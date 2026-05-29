@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SciOly Food Science Tutor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1117;
+    --bg2: #161b26;
+    --bg3: #1e2535;
+    --border: #2a3245;
+    --accent: #4ade80;
+    --accent2: #86efac;
+    --amber: #fbbf24;
+    --coral: #fb7185;
+    --text: #e8edf5;
+    --muted: #7a8ba8;
+    --card: #131929;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .wrap { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 28px 0 32px; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+  .logo { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--text); letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
+  .badge { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); border: 1px solid var(--accent); padding: 4px 10px; border-radius: 20px; letter-spacing: 0.05em; opacity: 0.8; }
+  .progress-strip { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 28px; display: flex; align-items: center; gap: 16px; }
+  .progress-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+  .week-dots { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .week-dot { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+  .week-dot:hover { border-color: var(--accent); color: var(--accent); }
+  .week-dot.done { background: rgba(74,222,128,0.12); border-color: var(--accent); color: var(--accent2); }
+  .week-dot.active { background: var(--accent); color: #0e1117; font-weight: 500; }
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 24px; }
+  .panel-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .panel-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .panel-title { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .panel-week { margin-left: auto; font-family: 'Fraunces', serif; font-size: 13px; color: var(--accent2); }
+  #view-greeting { padding: 32px 28px; }
+  .greeting-title { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 300; line-height: 1.2; margin-bottom: 8px; }
+  .greeting-title em { font-style: italic; color: var(--accent2); }
+  .greeting-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+  .plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+  .plan-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all 0.15s; display: flex; gap: 10px; align-items: flex-start; }
+  .plan-item:hover { border-color: var(--accent); background: rgba(74,222,128,0.05); }
+  .plan-item.done { opacity: 0.5; }
+  .plan-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); padding-top: 2px; min-width: 28px; }
+  .plan-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .plan-sub { font-size: 11px; color: var(--muted); }
+  .cta-btn { background: var(--accent); color: #0e1117; border: none; padding: 12px 24px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 8px; }
+  .cta-btn:hover { background: var(--accent2); }
+  #view-study { display: none; padding: 0; }
+  .study-topic-bar { padding: 20px 28px 0; }
+  .topic-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .topic-title { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 300; margin-bottom: 4px; }
+  .topic-desc { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .time-bar { display: flex; gap: 6px; margin-bottom: 24px; padding: 0 28px; }
+  .time-seg { height: 4px; border-radius: 2px; flex: 1; background: var(--border); position: relative; overflow: hidden; }
+  .time-seg-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); width: 0%; transition: width 0.6s ease; border-radius: 2px; }
+  #resource-list { padding: 0 28px 28px; }
+  .resource-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; opacity: 0; transform: translateY(8px); animation: fadeUp 0.3s ease forwards; transition: border-color 0.15s; }
+  .resource-card:hover { border-color: var(--accent); }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .res-type-badge { font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 8px; border-radius: 4px; white-space: nowrap; margin-top: 2px; }
+  .badge-video { background: rgba(251,191,36,0.12); color: var(--amber); border: 1px solid rgba(251,191,36,0.25); }
+  .badge-read  { background: rgba(74,222,128,0.10); color: var(--accent2); border: 1px solid rgba(74,222,128,0.2); }
+  .badge-activity { background: rgba(251,113,133,0.10); color: var(--coral); border: 1px solid rgba(251,113,133,0.2); }
+  .res-body { flex: 1; }
+  .res-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+  .res-source { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .res-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+  .res-time { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); margin-top: 6px; }
+  .res-link { font-size: 11px; color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; opacity: 0.8; }
+  .res-link:hover { opacity: 1; }
+  .res-section-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin: 20px 0 10px; display: flex; align-items: center; gap: 8px; }
+  .res-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .concepts-box { background: rgba(74,222,128,0.05); border: 1px solid rgba(74,222,128,0.15); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; }
+  .concepts-title { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .concepts-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .concept-tag { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 3px 8px; font-size: 12px; color: var(--text); }
+  .bottom-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding: 0 28px 24px; }
+  .nav-btn { background: var(--bg3); color: var(--text); border: 1px solid var(--border); padding: 10px 18px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #0e1117; border-color: var(--accent); font-weight: 500; }
+  .nav-btn.primary:hover { background: var(--accent2); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media(max-width: 560px) { .plan-grid { grid-template-columns: 1fr; } .greeting-title { font-size: 24px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">SciOly <span>Food Science</span></div>
+    <div class="badge">DIV B · RESEARCHER</div>
+  </header>
+  <div class="progress-strip">
+    <div class="progress-label">Weeks</div>
+    <div class="week-dots" id="week-dots"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-dot"></div>
+      <div class="panel-title" id="panel-label">Study planner</div>
+      <div class="panel-week" id="panel-week"></div>
+    </div>
+    <div id="view-greeting">
+      <div class="greeting-title">Hello, <em>scientist.</em><br>Ready to study?</div>
+      <div class="greeting-sub">Pick a week below to load 2 hours of curated resources — videos, readings, and hands-on activities — all calibrated for Science Olympiad Div B Food Science.</div>
+      <div class="plan-grid" id="plan-grid"></div>
+      <button class="cta-btn" id="start-btn" onclick="startWeek(currentWeek)">
+        <span>▶</span> Start Week <span id="start-week-label">1</span>
+      </button>
+    </div>
+    <div id="view-study">
+      <div class="study-topic-bar">
+        <div class="topic-eyebrow" id="study-eyebrow"></div>
+        <div class="topic-title" id="study-title"></div>
+        <div class="topic-desc" id="study-desc"></div>
+      </div>
+      <div class="time-bar" id="time-bar">
+        <div class="time-seg"><div class="time-seg-fill"></div></div>
+        <div class="time-seg"><div class="time-seg-fill"></div></div>
+        <div class="time-seg"><div class="time-seg-fill"></div></div>
+        <div class="time-seg"><div class="time-seg-fill"></div></div>
+      </div>
+      <div id="resource-list">
+        <div id="resource-content"></div>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-btn" onclick="showGreeting()">← Back to plan</button>
+        <button class="nav-btn primary" id="done-btn" onclick="markDone()">Mark week done ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STUDY_PLAN = [
+  { week:1,  name:"What is food science?",        sub:"Intro + careers",           desc:"Overview of food science as a discipline, its history, and what scientists do in the field.",                             concepts:["Food science definition","Nutrition basics","Food industry careers","Scientific method in food labs"] },
+  { week:2,  name:"Macronutrients",               sub:"Carbs, proteins, fats",     desc:"Structure and function of carbohydrates, proteins, and lipids in food and the body.",                                   concepts:["Carbohydrates","Proteins","Lipids","Caloric density","Macronutrient roles"] },
+  { week:3,  name:"Micronutrients & water",       sub:"Vitamins, minerals",        desc:"Vitamins, minerals, and water — what they do and where they're found in food.",                                         concepts:["Fat-soluble vitamins","Water-soluble vitamins","Major minerals","Trace minerals","Hydration"] },
+  { week:4,  name:"Food chemistry basics",        sub:"pH, acids, bases",          desc:"Chemical properties of food: pH, acids, bases, and how they affect flavor and preservation.",                           concepts:["pH scale","Acids in food","Bases in food","Maillard reaction","Caramelization"] },
+  { week:5,  name:"Food microbiology",            sub:"Bacteria, yeast, mold",     desc:"Microorganisms in food — helpful and harmful — and how they affect safety and flavor.",                                 concepts:["Bacteria in food","Yeast fermentation","Mold","Foodborne illness","Beneficial microbes"] },
+  { week:6,  name:"Food preservation",            sub:"Techniques & science",      desc:"Methods for preserving food: canning, freezing, drying, fermentation, and more.",                                       concepts:["Canning","Freezing","Dehydration","Fermentation","Pasteurization","Pickling"] },
+  { week:7,  name:"Food safety & HACCP",          sub:"Danger zone, pathogens",    desc:"Principles of food safety, the temperature danger zone, and HACCP concepts.",                                           concepts:["Temperature danger zone","Cross-contamination","HACCP","Pathogens","Personal hygiene"] },
+  { week:8,  name:"Food additives & labels",      sub:"Preservatives, emulsifiers",desc:"What additives do, how emulsifiers work, and how to read an ingredient and nutrition label.",                           concepts:["Preservatives","Emulsifiers","Coloring agents","Flavor enhancers","Label reading"] },
+  { week:9,  name:"Sensory evaluation",           sub:"Taste, texture, appearance",desc:"The science of how we perceive food: taste, smell, texture, color, and appearance.",                                    concepts:["5 basic tastes","Olfaction","Texture & mouthfeel","Appearance","Sensory panel methods"] },
+  { week:10, name:"Food processing",              sub:"Thermal, mechanical",       desc:"How food is processed industrially: heat treatment, milling, extrusion, and more.",                                     concepts:["Pasteurization","Homogenization","Extrusion","Milling","Freeze-drying"] },
+  { week:11, name:"Nutrition science",            sub:"Metabolism, diet, labels",  desc:"How the body uses nutrients, reading nutrition facts labels, and dietary guidelines.",                                   concepts:["Metabolism","Nutrition Facts label","Daily values","Dietary fiber","Added sugars"] },
+  { week:12, name:"Food lab techniques",          sub:"Testing & analysis",        desc:"Lab skills used in food science: titration, Benedict's test, chromatography, and more.",                               concepts:["Benedict's test","Iodine test","Biuret test","Chromatography","Titration"] },
+  { week:13, name:"Special topics",              sub:"GMOs, organic, sustainability",desc:"Contemporary issues: GMOs, organic food, food sustainability, and future food technology.",                             concepts:["GMOs","Organic certification","Sustainable food","Lab-grown meat","Food security"] },
+  { week:14, name:"Full review & test prep",      sub:"Practice + exam strategies",desc:"Comprehensive review of all topics with practice questions and test-day strategies for SciOly.",                        concepts:["All-topics review","Test strategies","Key formulas","Common SciOly pitfalls"] },
+];
+
+const YT = q => "https://www.youtube.com/results?search_query=" + encodeURIComponent(q);
+const GS = q => "https://www.google.com/search?q=" + encodeURIComponent(q);
+
+const RESOURCES = {
+  1: {
+    concepts:["Food science definition","Nutrition basics","Food industry careers","Scientific method"],
+    resources:[
+      { type:"video",    title:"What is Food Science?",                          source:"YouTube — IFT",              desc:"A fun 10-minute intro explaining what food scientists do day to day, from flavor labs to food safety testing.", time:"10 min", url:YT("what is food science introduction IFT career") },
+      { type:"video",    title:"The Scientific Method — Crash Course Biology",   source:"YouTube — CrashCourse",      desc:"How scientists apply the scientific method when designing food experiments — a foundation skill for SciOly labs.", time:"10 min", url:YT("scientific method crash course biology") },
+      { type:"read",     title:"What is Food Science? — IFT Overview",           source:"ift.org",                    desc:"Overview of the branches of food science: food chemistry, microbiology, engineering, and sensory science.", time:"20 min", url:GS("what is food science IFT branches overview site:ift.org") },
+      { type:"read",     title:"Nutrition Basics for Kids",                       source:"KidsHealth",                 desc:"Age-appropriate intro to macronutrients and micronutrients, what food energy means, and why our bodies need different nutrients.", time:"15 min", url:GS("nutrition basics for kids macronutrients kidshealth.org") },
+      { type:"activity", title:"Food Scientist for a Day",                        source:"SciOly prep activity",       desc:"Write 5 food questions you wonder about — Why does bread rise? Why does fruit brown? Why is vinegar sour? You'll answer every one of these in the coming weeks. Keep the list to compare at Week 14!", time:"20 min", url:null },
+    ]
+  },
+  2: {
+    concepts:["Carbohydrates","Proteins","Lipids","Caloric density","Macronutrient roles"],
+    resources:[
+      { type:"video",    title:"Carbohydrates — Structure & Function",            source:"YouTube — Bozeman Science",  desc:"Visual explainer on monosaccharides, disaccharides, and polysaccharides with real food examples like starch, glucose, and fiber.", time:"10 min", url:YT("carbohydrates structure function Bozeman Science") },
+      { type:"video",    title:"Proteins & Amino Acids in Food",                  source:"YouTube — TED-Ed",           desc:"How amino acid chains fold into proteins and why protein structure matters in cooking — what happens when you cook an egg.", time:"8 min",  url:YT("proteins amino acids food science TED-Ed") },
+      { type:"video",    title:"Lipids: Fats and Oils Explained",                 source:"YouTube — Bozeman Science",  desc:"Saturated vs unsaturated fats, omega fatty acids, and why fat is essential for absorbing fat-soluble vitamins.", time:"9 min",  url:YT("lipids fats oils Bozeman Science") },
+      { type:"read",     title:"Macronutrients — Khan Academy",                   source:"Khan Academy",               desc:"Well-structured reading on carbs, proteins, and fats with diagrams and practice questions.", time:"20 min", url:GS("macronutrients carbohydrates proteins fats Khan Academy article") },
+      { type:"activity", title:"Macronutrient food label hunt",                   source:"Kitchen activity",           desc:"Pick 5 foods from your pantry. Record grams of carbs, protein, and fat per serving. Calculate caloric density: (carbs×4 + protein×4 + fat×9). Which food is densest? Which has the most protein per calorie?", time:"25 min", url:null },
+    ]
+  },
+  3: {
+    concepts:["Fat-soluble vitamins","Water-soluble vitamins","Major minerals","Trace minerals","Hydration"],
+    resources:[
+      { type:"video",    title:"Fat-Soluble Vitamins A, D, E, K",                source:"YouTube — Armando Hasudungan",desc:"Clear explanation of the four fat-soluble vitamins, where they're stored in the body, food sources, and what deficiencies cause.", time:"12 min", url:YT("fat soluble vitamins ADEK explained") },
+      { type:"video",    title:"Water-Soluble Vitamins: B Complex & Vitamin C",  source:"YouTube — Ninja Nerd",       desc:"Why B vitamins and vitamin C aren't stored long-term, which foods contain them, and classic deficiency diseases like scurvy and beriberi.", time:"14 min", url:YT("water soluble vitamins B complex vitamin C explained") },
+      { type:"video",    title:"Minerals Your Body Needs — and Why",             source:"YouTube — SciShow",          desc:"Calcium, iron, potassium, zinc, and more — what each mineral does and the consequences of deficiency.", time:"8 min",  url:YT("minerals body needs calcium iron zinc SciShow") },
+      { type:"read",     title:"Vitamins and Minerals — MedlinePlus",             source:"medlineplus.gov",            desc:"Government reference listing all major vitamins and minerals, daily requirements, food sources, and deficiency symptoms.", time:"20 min", url:GS("vitamins minerals food sources deficiency medlineplus.gov") },
+      { type:"activity", title:"Vitamin & mineral scavenger hunt",                source:"Prep activity",              desc:"Make a two-column chart listing 10 vitamins/minerals. For each, find 2 real foods in your kitchen that contain it (use labels or search). This is the best memorization technique for SciOly.", time:"30 min", url:null },
+    ]
+  },
+  4: {
+    concepts:["pH scale","Acids in food","Bases in food","Maillard reaction","Caramelization"],
+    resources:[
+      { type:"video",    title:"pH and the Chemistry of Food",                   source:"YouTube — Reactions (ACS)",  desc:"American Chemical Society video explaining how pH affects food taste, preservation, and texture with excellent food examples.", time:"8 min",  url:YT("pH chemistry of food Reactions ACS American Chemical Society") },
+      { type:"video",    title:"The Maillard Reaction Explained",                source:"YouTube — SciShow",          desc:"Why food turns brown and delicious when heated — the amino acid and sugar reaction behind toast, grilled meat, and coffee.", time:"8 min",  url:YT("Maillard reaction explained SciShow food browning") },
+      { type:"video",    title:"Caramelization vs Maillard — What's the Difference?", source:"YouTube — food science",desc:"Clears up a common SciOly confusion: caramelization (sugar only, ~160°C) vs Maillard reaction (sugar + protein, ~140°C). Know both temperatures!", time:"7 min",  url:YT("caramelization vs Maillard reaction difference food science") },
+      { type:"read",     title:"Acids and Bases in Food — pH explained",         source:"Google search",              desc:"Accessible summary of how acids and bases show up in common foods: citrus (pH 2), vinegar (pH 3), baking soda (pH 9), and dairy.", time:"15 min", url:GS("acids and bases in everyday food pH examples lemon vinegar baking soda") },
+      { type:"activity", title:"Red cabbage pH indicator lab",                   source:"Home lab activity",          desc:"Boil red cabbage and collect the purple liquid as a natural pH indicator. Test: lemon juice, vinegar, baking soda water, milk, and plain water. Record color changes and rank from most acidic to most basic. A classic SciOly lab skill!", time:"40 min", url:GS("red cabbage pH indicator experiment home lab science") },
+    ]
+  },
+  5: {
+    concepts:["Bacteria in food","Yeast fermentation","Mold","Foodborne illness","Beneficial microbes"],
+    resources:[
+      { type:"video",    title:"Bacteria in Food — Friend or Foe?",              source:"YouTube — SciShow",          desc:"How bacteria interact with food — from harmful pathogens like Salmonella to helpful bacteria that make yogurt and cheese.", time:"9 min",  url:YT("bacteria in food friend or foe SciShow") },
+      { type:"video",    title:"How Yeast Works — Fermentation Explained",       source:"YouTube — TED-Ed",           desc:"The biochemistry of yeast fermentation: how yeast converts sugars to CO2 and ethanol, and why it makes bread rise.", time:"7 min",  url:YT("yeast fermentation explained TED-Ed bread rising") },
+      { type:"video",    title:"Mold: The Good, the Bad, and the Delicious",     source:"YouTube — SciShow",          desc:"How mold grows on food, which molds are dangerous, and which are deliberately used in blue cheese and soy sauce.", time:"8 min",  url:YT("mold food good bad SciShow") },
+      { type:"read",     title:"Foodborne Illness — CDC Overview",               source:"CDC / Google search",        desc:"The most common foodborne pathogens: Salmonella, E. coli, Listeria, Norovirus. Symptoms, sources, and prevention.", time:"20 min", url:GS("foodborne illness common pathogens Salmonella E coli Listeria CDC") },
+      { type:"activity", title:"Yeast fermentation observation",                 source:"Kitchen lab",                desc:"Mix 1 tsp yeast + 1 tsp sugar + 1/4 cup warm water in a bottle. Stretch a balloon over the opening. Observe for 15 minutes. Draw and explain what you see using the terms: fermentation, CO2, anaerobic.", time:"30 min", url:null },
+    ]
+  },
+  6: {
+    concepts:["Canning","Freezing","Dehydration","Fermentation","Pasteurization","Pickling"],
+    resources:[
+      { type:"video",    title:"How Food Preservation Works",                    source:"YouTube — SciShow",          desc:"Overview of the major food preservation techniques and the science behind why each one works to stop spoilage.", time:"10 min", url:YT("how food preservation works science SciShow") },
+      { type:"video",    title:"Pasteurization — The History and Science",       source:"YouTube — TED-Ed",           desc:"How Louis Pasteur discovered that heating kills harmful microbes, and how pasteurization works in modern milk and juice production.", time:"6 min",  url:YT("pasteurization history science TED-Ed Louis Pasteur") },
+      { type:"video",    title:"Fermentation: How Humans Have Used Microbes for Thousands of Years", source:"YouTube — Kurzgesagt / SciShow", desc:"From ancient fermented beverages to modern kimchi and kombucha — the microbiology of fermentation as preservation.", time:"10 min", url:YT("fermentation food preservation history microbes science") },
+      { type:"read",     title:"Methods of Food Preservation — USDA",            source:"USDA / Google search",       desc:"Government overview of canning, freezing, dehydrating, fermenting, and pickling with the science behind each method.", time:"20 min", url:GS("food preservation methods canning freezing dehydrating USDA science") },
+      { type:"activity", title:"Compare preserved vs fresh food",                source:"Kitchen observation",        desc:"Compare a fresh food to its preserved version: fresh vs canned tomatoes, fresh vs frozen peas, fresh vs dried apricots. For each pair, record: color, texture, smell, taste, and water content. Write one sentence explaining what the preservation method changed chemically.", time:"30 min", url:null },
+    ]
+  },
+  7: {
+    concepts:["Temperature danger zone","Cross-contamination","HACCP","Pathogens","Personal hygiene"],
+    resources:[
+      { type:"video",    title:"Food Safety: The Temperature Danger Zone",       source:"YouTube — StateFoodSafety",  desc:"Why bacteria grow fastest between 40°F–140°F (4°C–60°C), how quickly food becomes dangerous, and the 2-hour rule.", time:"8 min",  url:YT("food safety temperature danger zone 40 140 degrees bacteria growth") },
+      { type:"video",    title:"Cross-Contamination in the Kitchen",             source:"YouTube — FDA / food safety",desc:"How pathogens spread from raw foods to ready-to-eat foods via hands, cutting boards, and utensils — with prevention tips.", time:"7 min",  url:YT("cross contamination kitchen prevention food safety") },
+      { type:"video",    title:"What is HACCP?",                                 source:"YouTube — food safety",      desc:"Hazard Analysis and Critical Control Points — the systematic approach the food industry uses to prevent contamination.", time:"8 min",  url:YT("what is HACCP food safety hazard analysis critical control points explained") },
+      { type:"read",     title:"HACCP Principles — FDA Overview",                source:"FDA / Google search",        desc:"The 7 principles of HACCP: hazard analysis, critical control points, critical limits, monitoring, corrective actions, verification, and record keeping.", time:"20 min", url:GS("HACCP 7 principles food safety FDA overview") },
+      { type:"activity", title:"Kitchen food safety audit",                      source:"Home activity",              desc:"Inspect your kitchen and refrigerator. Check: fridge temp (should be ≤40°F/4°C), raw meat storage (should be on bottom shelf), use of separate cutting boards, proper hand-washing stations. Write a short report: what's safe, what could be improved?", time:"25 min", url:null },
+    ]
+  },
+  8: {
+    concepts:["Preservatives","Emulsifiers","Coloring agents","Flavor enhancers","Label reading"],
+    resources:[
+      { type:"video",    title:"Food Additives: What They Are and Why They're Used", source:"YouTube — SciShow",      desc:"The major categories of food additives — preservatives, emulsifiers, colorants, and flavor enhancers — and why each is used.", time:"9 min",  url:YT("food additives what are they used for SciShow") },
+      { type:"video",    title:"How to Read a Food Label",                       source:"YouTube — FDA / nutrition",  desc:"Step-by-step guide to the Nutrition Facts panel: serving size, daily values, ingredient list order, and what to watch for.", time:"8 min",  url:YT("how to read a food label nutrition facts FDA step by step") },
+      { type:"video",    title:"Emulsifiers: How Mayonnaise Doesn't Separate",   source:"YouTube — food chemistry",   desc:"How emulsifiers like lecithin keep oil and water mixed — the chemistry behind mayonnaise, salad dressing, and chocolate.", time:"7 min",  url:YT("emulsifiers food chemistry mayonnaise lecithin oil water") },
+      { type:"read",     title:"Food Additives — FDA Overview",                   source:"FDA / Google search",       desc:"The FDA's explanation of how food additives are regulated, safety testing, and a list of common additives and their purposes.", time:"20 min", url:GS("food additives FDA overview regulated safety common additives list") },
+      { type:"activity", title:"Ingredient label detective",                      source:"Kitchen activity",          desc:"Find 5 packaged foods. For each, list every additive (look for numbers like Red 40, sodium benzoate, lecithin, carrageenan). Classify each as: preservative, emulsifier, colorant, flavor enhancer, or texture agent. Which food has the most additives?", time:"30 min", url:null },
+    ]
+  },
+  9: {
+    concepts:["5 basic tastes","Olfaction","Texture & mouthfeel","Appearance","Sensory panel methods"],
+    resources:[
+      { type:"video",    title:"The Science of Taste",                           source:"YouTube — TED-Ed",           desc:"How taste buds detect sweet, salty, sour, bitter, and umami — and why smell is responsible for 80% of what we call 'flavor'.", time:"7 min",  url:YT("science of taste sweet salty sour bitter umami TED-Ed") },
+      { type:"video",    title:"How Does Your Sense of Smell Work?",             source:"YouTube — TED-Ed",           desc:"The olfactory system and how airborne molecules trigger smell receptors — critical for understanding food flavor.", time:"5 min",  url:YT("how does sense of smell work olfaction TED-Ed") },
+      { type:"video",    title:"Food Texture and Mouthfeel — Why It Matters",    source:"YouTube — food science",     desc:"How food scientists measure and engineer texture — crunchiness, creaminess, viscosity — and why texture affects enjoyment.", time:"8 min",  url:YT("food texture mouthfeel science crunchiness viscosity engineering") },
+      { type:"read",     title:"Sensory Evaluation of Food — overview",          source:"Google search",              desc:"How trained sensory panels rate food appearance, aroma, taste, texture, and aftertaste — methods used in the food industry.", time:"20 min", url:GS("sensory evaluation food science appearance aroma taste texture panel methods") },
+      { type:"activity", title:"Blind taste test sensory panel",                 source:"Home activity",              desc:"Conduct a 3-sample triangle test: prepare 2 identical samples and 1 slightly different (e.g., regular vs salted butter, different brand crackers). Blindfold the taster — can they pick the odd one out? Try with 3 tasters. Calculate % correct. Real sensory science!", time:"35 min", url:null },
+    ]
+  },
+  10: {
+    concepts:["Pasteurization","Homogenization","Extrusion","Milling","Freeze-drying"],
+    resources:[
+      { type:"video",    title:"How Milk is Processed — Pasteurization & Homogenization", source:"YouTube — How It's Made", desc:"The industrial steps milk goes through: raw collection, pasteurization (killing pathogens), homogenization (preventing cream separation), and packaging.", time:"8 min",  url:YT("how milk is processed pasteurization homogenization industrial") },
+      { type:"video",    title:"Extrusion in Food Processing — How Cereal is Made", source:"YouTube — How It's Made", desc:"How food extruders force dough through shaped dies under heat and pressure to create cereals, pasta, and snack foods.", time:"7 min",  url:YT("food extrusion cereal pasta processing how its made") },
+      { type:"video",    title:"Freeze Drying Food — How It Works",              source:"YouTube — SciShow / How It's Made", desc:"The science of freeze-drying: how removing water by sublimation (not heat) preserves nutrients, flavor, and structure.", time:"8 min",  url:YT("freeze drying food how it works sublimation science") },
+      { type:"read",     title:"Food Processing Methods — overview",              source:"Google search",              desc:"Survey of thermal processing (pasteurization, sterilization), mechanical processing (milling, extrusion), and cold processing (refrigeration, freeze-drying).", time:"20 min", url:GS("food processing methods thermal mechanical cold processing overview science") },
+      { type:"activity", title:"Compare processing levels in your pantry",       source:"Kitchen activity",           desc:"Find one minimally processed food (e.g., apple), one moderately processed (canned peaches), and one highly processed (fruit snack). Compare: ingredient list length, sodium, sugar, vitamins retained. Does more processing always mean less nutrition?", time:"25 min", url:null },
+    ]
+  },
+  11: {
+    concepts:["Metabolism","Nutrition Facts label","Daily values","Dietary fiber","Added sugars"],
+    resources:[
+      { type:"video",    title:"How Your Body Turns Food into Energy",           source:"YouTube — TED-Ed",           desc:"The basics of metabolism: how carbohydrates, fats, and proteins are broken down and converted to ATP for energy.", time:"8 min",  url:YT("how body turns food into energy metabolism TED-Ed") },
+      { type:"video",    title:"How to Read the Nutrition Facts Label",          source:"YouTube — FDA",              desc:"Official FDA guidance on the updated Nutrition Facts label: serving sizes, daily values, added sugars, and what % DV actually means.", time:"7 min",  url:YT("how to read nutrition facts label FDA updated 2020") },
+      { type:"video",    title:"Dietary Fiber — Why It Matters",                 source:"YouTube — SciShow",          desc:"Soluble vs insoluble fiber, how fiber affects digestion and gut bacteria, and why most Americans don't get enough.", time:"7 min",  url:YT("dietary fiber why it matters soluble insoluble SciShow") },
+      { type:"read",     title:"Dietary Guidelines for Americans — Key Takeaways", source:"USDA / Google search",     desc:"The main recommendations from the USDA Dietary Guidelines: food groups, portion sizes, limits on added sugars and sodium.", time:"20 min", url:GS("USDA dietary guidelines Americans key recommendations food groups 2020") },
+      { type:"activity", title:"One-day diet analysis",                          source:"Nutrition activity",         desc:"Track everything you eat for one day. Use a free tool (Cronometer.com or MyFitnessPal) to log nutrients. Which nutrients did you hit your daily value for? Which were you under? Write 3 observations about your diet based on the data.", time:"30 min", url:GS("Cronometer free nutrition tracker food log daily values") },
+    ]
+  },
+  12: {
+    concepts:["Benedict's test","Iodine test","Biuret test","Chromatography","Titration"],
+    resources:[
+      { type:"video",    title:"Food Testing Lab Techniques — Benedict's, Iodine, Biuret", source:"YouTube — science lab", desc:"Demonstration of the three classic food chemistry tests: Benedict's for reducing sugars (blue→brick red), iodine for starch (yellow→blue-black), Biuret for protein (blue→purple).", time:"12 min", url:YT("Benedict test iodine test Biuret test food science lab demonstration") },
+      { type:"video",    title:"Paper Chromatography — Separating Food Dyes",    source:"YouTube — science experiment",desc:"How paper chromatography separates the dye components in food coloring and markers — a technique that appears in SciOly labs.", time:"8 min",  url:YT("paper chromatography food dyes separation science experiment") },
+      { type:"video",    title:"Titration Explained — Acid-Base Titration",      source:"YouTube — Tyler DeWitt",     desc:"How titration works to measure the exact concentration of an acid or base in a solution — used in food science to test vitamin C and acidity.", time:"10 min", url:YT("titration explained acid base Tyler DeWitt chemistry") },
+      { type:"read",     title:"Food Analysis Lab Tests — overview",              source:"Google search",              desc:"Summary of common food analysis tests used in SciOly: what each test detects, the color change to look for, and common false positives.", time:"20 min", url:GS("food analysis lab tests Benedict iodine Biuret chromatography titration SciOly") },
+      { type:"activity", title:"Benedict's test at home",                        source:"Home lab activity",          desc:"You can test for sugars at home! Use iodine solution (from a pharmacy) to test starch: drop iodine on bread, potato, rice, and apple. Record color changes. Which turned blue-black (starch present)? Which didn't change (no starch)? Write your results in a data table.", time:"30 min", url:GS("iodine starch test home lab experiment food science") },
+    ]
+  },
+  13: {
+    concepts:["GMOs","Organic certification","Sustainable food","Lab-grown meat","Food security"],
+    resources:[
+      { type:"video",    title:"GMOs — What Are They Really?",                   source:"YouTube — SciShow",          desc:"What genetic modification actually involves, examples of GMO crops, and the scientific consensus on safety vs the public debate.", time:"9 min",  url:YT("GMOs genetically modified organisms what are they really SciShow") },
+      { type:"video",    title:"What Does Organic Actually Mean?",               source:"YouTube — SciShow",          desc:"USDA organic certification: what farmers can and can't use, how it differs from conventional farming, and what the research says about nutrition.", time:"8 min",  url:YT("what does organic mean USDA certification farming SciShow") },
+      { type:"video",    title:"Lab-Grown Meat — The Future of Food?",           source:"YouTube — Kurzgesagt / TED", desc:"How cultured meat is grown from animal cells without slaughter, the current challenges in scaling production, and the environmental implications.", time:"10 min", url:YT("lab grown meat cultured meat future food Kurzgesagt") },
+      { type:"read",     title:"Food Security and Sustainable Food Systems",      source:"Google search",              desc:"What food security means globally, how food waste and climate change threaten it, and solutions being developed.", time:"20 min", url:GS("food security sustainable food systems global hunger climate change solutions") },
+      { type:"activity", title:"Food ethics debate prep",                        source:"Discussion activity",        desc:"Pick one topic: GMOs, lab-grown meat, or organic food. Find 3 arguments FOR and 3 arguments AGAINST. Write a 1-paragraph position statement with evidence. This style of evidence-based reasoning shows up in SciOly test questions.", time:"30 min", url:null },
+    ]
+  },
+  14: {
+    concepts:["All-topics review","Test strategies","Key formulas","Common SciOly pitfalls"],
+    resources:[
+      { type:"video",    title:"Food Science Full Review — Key Concepts",        source:"YouTube search",             desc:"Search for a recent SciOly Food Science review video from a student or coach — these are updated each season and cover the exact topics tested.", time:"20 min", url:YT("Science Olympiad Food Science review 2024 2025 Div B") },
+      { type:"read",     title:"SciOly Food Science — scioly.org Wiki",          source:"scioly.org",                 desc:"The official community wiki covering all testable topics for the Food Science event — use this as your final checklist.", time:"25 min", url:GS("site:scioly.org food science wiki topics rules") },
+      { type:"read",     title:"Past invitational tests — Highlands, TX A&M, UT Austin", source:"Google search",    desc:"Search for free past tests from invitationals — the best practice for getting used to real SciOly question style and difficulty.", time:"30 min", url:GS("Science Olympiad Food Science past tests invitational Highlands Texas AM UT Austin free") },
+      { type:"activity", title:"Flash card blitz — all 14 weeks",               source:"Review activity",            desc:"Make one flash card for each key concept from your Week 1 list of questions. On the front: the question. On the back: a 2-sentence answer with a specific fact. Quiz yourself until you get 100% right twice in a row.", time:"40 min", url:null },
+      { type:"activity", title:"Answer your Week 1 questions",                  source:"Reflection activity",        desc:"Go back to your Week 1 activity where you wrote 5 food questions. Can you answer all of them now? Write a full answer for each using specific vocabulary from the course. This is your personal evidence of how much you've learned!", time:"20 min", url:null },
+    ]
+  },
+};
+
+let currentWeek = 1;
+let doneWeeks = new Set();
+
+function init() {
+  try {
+    const saved = localStorage.getItem('scioly_fs_done');
+    if (saved) doneWeeks = new Set(JSON.parse(saved));
+    const savedWeek = localStorage.getItem('scioly_fs_week');
+    if (savedWeek) currentWeek = parseInt(savedWeek);
+  } catch(e) {}
+  renderDots();
+  renderPlan();
+  showGreeting();
+}
+
+function renderDots() {
+  document.getElementById('week-dots').innerHTML = STUDY_PLAN.map(w =>
+    `<div class="week-dot ${doneWeeks.has(w.week)?'done':''} ${w.week===currentWeek?'active':''}"
+      onclick="jumpWeek(${w.week})">${w.week}</div>`
+  ).join('');
+}
+
+function renderPlan() {
+  document.getElementById('plan-grid').innerHTML = STUDY_PLAN.map(w =>
+    `<div class="plan-item ${doneWeeks.has(w.week)?'done':''}" onclick="startWeek(${w.week})">
+      <div class="plan-num">W${w.week}</div>
+      <div class="plan-info">
+        <div class="plan-name">${w.name}</div>
+        <div class="plan-sub">${w.sub}</div>
+      </div>
+    </div>`
+  ).join('');
+  document.getElementById('start-week-label').textContent = currentWeek;
+}
+
+function jumpWeek(w) {
+  currentWeek = w;
+  try { localStorage.setItem('scioly_fs_week', w); } catch(e) {}
+  renderDots();
+  document.getElementById('start-week-label').textContent = w;
+}
+
+function showGreeting() {
+  document.getElementById('view-greeting').style.display = 'block';
+  document.getElementById('view-study').style.display = 'none';
+  document.getElementById('panel-label').textContent = 'Study planner';
+  document.getElementById('panel-week').textContent = '';
+}
+
+function startWeek(w) {
+  currentWeek = w;
+  try { localStorage.setItem('scioly_fs_week', w); } catch(e) {}
+  const plan = STUDY_PLAN.find(p => p.week === w);
+  const data = RESOURCES[w];
+  document.getElementById('view-greeting').style.display = 'none';
+  document.getElementById('view-study').style.display = 'block';
+  document.getElementById('panel-label').textContent = 'Researcher agent';
+  document.getElementById('panel-week').textContent = `Week ${w} of 14`;
+  document.getElementById('study-eyebrow').textContent = `Week ${w} — Food Science`;
+  document.getElementById('study-title').textContent = plan.name;
+  document.getElementById('study-desc').textContent = plan.desc;
+  document.querySelectorAll('.time-seg-fill').forEach(el => el.style.width = '0%');
+
+  const videos = data.resources.filter(r => r.type === 'video');
+  const reads  = data.resources.filter(r => r.type === 'read');
+  const acts   = data.resources.filter(r => r.type === 'activity');
+
+  let html = `<div class="concepts-box">
+    <div class="concepts-title">Key concepts this week</div>
+    <div class="concepts-list">${data.concepts.map(c=>`<span class="concept-tag">${c}</span>`).join('')}</div>
+  </div>`;
+
+  if (videos.length) { html += `<div class="res-section-label">Watch first</div>` + videos.map((r,i)=>card(r,i*80)).join(''); }
+  if (reads.length)  { html += `<div class="res-section-label">Then read</div>`   + reads.map((r,i)=>card(r,(videos.length+i)*80)).join(''); }
+  if (acts.length)   { html += `<div class="res-section-label">Hands-on activity</div>` + acts.map((r,i)=>card(r,(videos.length+reads.length+i)*80)).join(''); }
+
+  document.getElementById('resource-content').innerHTML = html;
+
+  setTimeout(() => {
+    [65,80,90,100].forEach((v,i) => setTimeout(()=>{ document.querySelectorAll('.time-seg-fill')[i].style.width=v+'%'; }, i*180));
+  }, 300);
+}
+
+function card(r, delay) {
+  const badges = { video:'badge-video', read:'badge-read', activity:'badge-activity' };
+  const labels = { video:'VIDEO', read:'READING', activity:'ACTIVITY' };
+  const linkText = r.url && r.url.includes('google.com') ? 'Search for this ↗' : 'Open on YouTube ↗';
+  const link = r.url ? `<a class="res-link" href="${r.url}" target="_blank" rel="noopener">${linkText}</a>` : '';
+  return `<div class="resource-card" style="animation-delay:${delay}ms">
+    <div class="res-type-badge ${badges[r.type]}">${labels[r.type]}</div>
+    <div class="res-body">
+      <div class="res-title">${r.title}</div>
+      <div class="res-source">${r.source}</div>
+      <div class="res-desc">${r.desc}</div>
+      <div class="res-time">⏱ ${r.time}</div>
+      ${link}
+    </div>
+  </div>`;
+}
+
+function markDone() {
+  doneWeeks.add(currentWeek);
+  try { localStorage.setItem('scioly_fs_done', JSON.stringify([...doneWeeks])); } catch(e) {}
+  if (currentWeek < 14) currentWeek++;
+  try { localStorage.setItem('scioly_fs_week', currentWeek); } catch(e) {}
+  renderDots();
+  renderPlan();
+  showGreeting();
+}
+
+init();
+</script>
+</body>
+</html>
