@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SciOly Food Science Tutor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1117;--bg2:#161b26;--bg3:#1e2535;--border:#2a3245;
+  --accent:#4ade80;--accent2:#86efac;--amber:#fbbf24;--coral:#fb7185;
+  --text:#e8edf5;--muted:#7a8ba8;--card:#131929;
+  --goal:#7c3aed;--goal2:#a78bfa;
+  --test:#0ea5e9;--test2:#7dd3fc;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(74,222,128,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(74,222,128,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 24px 80px;}
+header{display:flex;align-items:center;justify-content:space-between;padding:28px 0 32px;border-bottom:1px solid var(--border);margin-bottom:36px;}
+.logo{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-0.5px;}
+.logo span{color:var(--accent);}
+.hbadges{display:flex;gap:8px;}
+.badge{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);border:1px solid var(--accent);padding:4px 10px;border-radius:20px;letter-spacing:0.05em;opacity:0.8;}
+.badge.test-badge{color:var(--test);border-color:var(--test);}
+.progress-strip{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px;display:flex;align-items:center;gap:16px;}
+.progress-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;}
+.week-dots{display:flex;gap:6px;flex-wrap:wrap;flex:1;}
+.week-dot{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.week-dot:hover{border-color:var(--accent);color:var(--accent);}
+.week-dot.done{background:rgba(74,222,128,0.12);border-color:var(--accent);color:var(--accent2);}
+.week-dot.tested{outline:2px solid var(--test);outline-offset:2px;}
+.week-dot.active{background:var(--accent);color:#0e1117;font-weight:500;}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:24px;}
+.panel-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.panel-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);}
+.panel-dot.blue{background:var(--test);}
+.panel-title{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;}
+.panel-week{margin-left:auto;font-family:'Fraunces',serif;font-size:13px;color:var(--accent2);}
+#view-greeting{padding:32px 28px;}
+.greeting-title{font-family:'Fraunces',serif;font-size:32px;font-weight:300;line-height:1.2;margin-bottom:8px;}
+.greeting-title em{font-style:italic;color:var(--accent2);}
+.greeting-sub{color:var(--muted);font-size:14px;margin-bottom:28px;line-height:1.6;}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;}
+.plan-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all 0.15s;display:flex;gap:10px;align-items:flex-start;}
+.plan-item:hover{border-color:var(--accent);background:rgba(74,222,128,0.05);}
+.plan-item.done{opacity:0.55;}
+.plan-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);padding-top:2px;min-width:28px;}
+.plan-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.plan-sub{font-size:11px;color:var(--muted);}
+.plan-badges{display:flex;gap:4px;margin-top:5px;}
+.plan-pip{font-family:'DM Mono',monospace;font-size:9px;padding:2px 6px;border-radius:3px;border:1px solid;}
+.pip-done{color:var(--accent2);border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.08);}
+.pip-tested{color:var(--test2);border-color:rgba(14,165,233,0.3);background:rgba(14,165,233,0.08);}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;}
+.cta-btn{border:none;padding:12px 22px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:8px;}
+.cta-btn.green{background:var(--accent);color:#0e1117;}
+.cta-btn.green:hover{background:var(--accent2);}
+.cta-btn.blue{background:var(--test);color:#0e1117;}
+.cta-btn.blue:hover{background:var(--test2);}
+#view-study{display:none;padding:0;}
+.study-topic-bar{padding:20px 28px 0;}
+.topic-eyebrow{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;}
+.topic-title{font-family:'Fraunces',serif;font-size:26px;font-weight:300;margin-bottom:4px;}
+.topic-desc{font-size:13px;color:var(--muted);margin-bottom:16px;}
+.goal-box{background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);border-radius:10px;padding:14px 18px;margin-bottom:16px;}
+.goal-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.goal-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--goal2);text-transform:uppercase;letter-spacing:0.08em;}
+.goal-text{font-size:13px;color:var(--text);line-height:1.6;margin-bottom:8px;}
+.goal-items{list-style:none;padding:0;}
+.goal-items li{font-size:12px;color:var(--muted);line-height:1.8;padding-left:14px;position:relative;}
+.goal-items li::before{content:'->'; position:absolute;left:0;color:var(--goal2);font-size:11px;}
+.time-bar{display:flex;gap:6px;margin-bottom:20px;padding:0 28px;}
+.time-seg{height:4px;border-radius:2px;flex:1;background:var(--border);position:relative;overflow:hidden;}
+.time-seg-fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);width:0%;transition:width 0.6s ease;border-radius:2px;}
+#resource-list{padding:0 28px 28px;}
+.resource-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;opacity:0;transform:translateY(8px);animation:fadeUp 0.3s ease forwards;transition:border-color 0.15s;}
+.resource-card:hover{border-color:var(--accent);}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+.res-type-badge{font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;white-space:nowrap;margin-top:2px;}
+.badge-video{background:rgba(251,191,36,0.12);color:var(--amber);border:1px solid rgba(251,191,36,0.25);}
+.badge-read{background:rgba(74,222,128,0.10);color:var(--accent2);border:1px solid rgba(74,222,128,0.2);}
+.badge-activity{background:rgba(251,113,133,0.10);color:var(--coral);border:1px solid rgba(251,113,133,0.2);}
+.res-body{flex:1;}
+.res-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.res-source{font-size:12px;color:var(--muted);margin-bottom:6px;}
+.res-desc{font-size:12px;color:var(--muted);line-height:1.55;}
+.res-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);margin-top:6px;}
+.res-link{font-size:11px;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-top:6px;opacity:0.8;}
+.res-link:hover{opacity:1;}
+.res-section-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin:20px 0 10px;display:flex;align-items:center;gap:8px;}
+.res-section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.concepts-box{background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.15);border-radius:10px;padding:14px 18px;margin-bottom:16px;}
+.concepts-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
+.concepts-list{display:flex;flex-wrap:wrap;gap:6px;}
+.concept-tag{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:3px 8px;font-size:12px;color:var(--text);}
+.study-nav{display:flex;justify-content:space-between;align-items:center;padding:16px 28px 28px;gap:12px;flex-wrap:wrap;}
+.nav-btn{background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:10px 18px;border-radius:8px;font-size:13px;cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif;}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+.nav-btn.primary{background:var(--accent);color:#0e1117;border-color:var(--accent);font-weight:500;}
+.nav-btn.primary:hover{background:var(--accent2);}
+.nav-btn.test-btn{background:rgba(14,165,233,0.12);color:var(--test2);border-color:rgba(14,165,233,0.35);}
+.nav-btn.test-btn:hover{background:rgba(14,165,233,0.22);border-color:var(--test);}
+#view-test{display:none;padding:0;}
+.test-header-bar{padding:20px 28px 0;}
+.test-meta{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:4px;}
+.test-title{font-family:'Fraunces',serif;font-size:24px;font-weight:300;margin-bottom:4px;}
+.test-subtitle{font-size:13px;color:var(--muted);margin-bottom:16px;}
+.test-info-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.test-chip{font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;border-radius:20px;border:1px solid rgba(14,165,233,0.3);color:var(--test2);background:rgba(14,165,233,0.07);}
+.test-generating{padding:48px 28px;text-align:center;}
+.test-spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--test);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.test-gen-label{font-size:13px;color:var(--muted);}
+.test-gen-sub{font-size:11px;color:var(--muted);margin-top:6px;opacity:0.6;}
+.test-body{padding:0 28px 12px;}
+.q-block{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:12px;opacity:0;transform:translateY(6px);animation:fadeUp 0.3s ease forwards;}
+.q-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--test2);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.q-type-tag{font-size:9px;padding:2px 7px;border-radius:3px;border:1px solid rgba(14,165,233,0.3);color:var(--test2);background:rgba(14,165,233,0.08);}
+.q-text{font-size:14px;color:var(--text);line-height:1.6;margin-bottom:12px;}
+.q-choices{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.q-choice{display:flex;align-items:flex-start;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;cursor:pointer;transition:all 0.15s;font-size:13px;color:var(--text);}
+.q-choice:hover{border-color:var(--test);color:var(--test2);}
+.q-choice.selected{border-color:var(--test);background:rgba(14,165,233,0.1);color:var(--test2);}
+.q-choice.correct{border-color:var(--accent);background:rgba(74,222,128,0.1);color:var(--accent2);}
+.q-choice.wrong{border-color:var(--coral);background:rgba(251,113,133,0.08);color:var(--coral);}
+.q-letter{font-family:'DM Mono',monospace;font-size:11px;min-width:16px;padding-top:1px;}
+.q-input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:vertical;min-height:64px;margin-bottom:12px;}
+.q-input:focus{outline:none;border-color:var(--test);}
+.q-input.revealed{border-color:var(--accent);}
+.reveal-btn{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:5px;padding:4px 10px;cursor:pointer;transition:all 0.15s;margin-bottom:10px;}
+.reveal-btn:hover{border-color:var(--test);color:var(--test2);}
+.answer-reveal{background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);border-radius:7px;padding:12px 14px;font-size:12px;color:var(--accent2);line-height:1.6;display:none;margin-bottom:10px;}
+.answer-reveal.show{display:block;}
+.answer-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);display:block;margin-bottom:4px;}
+.q-explanation{font-size:12px;color:var(--muted);line-height:1.6;padding-top:8px;border-top:1px solid var(--border);margin-top:8px;display:none;}
+.q-explanation.show{display:block;}
+.score-bar-wrap{padding:20px 28px;border-top:1px solid var(--border);margin-top:8px;}
+.score-bar-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;}
+.score-bar-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;background:var(--accent);border-radius:3px;transition:width 0.8s ease;}
+.score-summary{display:none;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:16px 20px;margin:0 28px 20px;}
+.score-summary.show{display:block;}
+.score-big{font-family:'Fraunces',serif;font-size:36px;font-weight:300;color:var(--accent2);}
+.score-detail{font-size:13px;color:var(--muted);margin-top:4px;}
+.test-nav{display:flex;justify-content:space-between;align-items:center;padding:16px 28px 28px;gap:12px;flex-wrap:wrap;}
+.submit-btn{background:var(--test);color:#0e1117;border:none;padding:11px 22px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;}
+.submit-btn:hover{background:var(--test2);}
+.error-box{background:rgba(251,113,133,0.08);border:1px solid rgba(251,113,133,0.2);border-radius:10px;padding:14px 18px;color:var(--coral);font-size:13px;margin:0 28px 20px;}
+@media(max-width:560px){.plan-grid{grid-template-columns:1fr;}.greeting-title{font-size:24px;}.cta-row{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">SciOly <span>Food Science</span></div>
+    <div class="hbadges"><div class="badge">DIV B</div><div class="badge test-badge">AI TESTER</div></div>
+  </header>
+  <div class="progress-strip">
+    <div class="progress-label">Weeks</div>
+    <div class="week-dots" id="week-dots"></div>
+  </div>
+  <div class="panel" id="main-panel">
+    <div class="panel-header">
+      <div class="panel-dot" id="panel-dot"></div>
+      <div class="panel-title" id="panel-label">Study planner</div>
+      <div class="panel-week" id="panel-week"></div>
+    </div>
+    <div id="view-greeting">
+      <div class="greeting-title">Hello, <em>scientist.</em><br>Ready to study?</div>
+      <div class="greeting-sub">Pick a week to study or jump straight to a practice test. Green dot = studied &middot; blue ring = tested.</div>
+      <div class="plan-grid" id="plan-grid"></div>
+      <div class="cta-row">
+        <button class="cta-btn green" onclick="startWeek(currentWeek)">&#9654; Study Week <span id="start-week-label">1</span></button>
+        <button class="cta-btn blue" onclick="startTest(currentWeek)">&#9889; Test Week <span id="test-week-label">1</span></button>
+      </div>
+    </div>
+    <div id="view-study">
+      <div class="study-topic-bar">
+        <div class="topic-eyebrow" id="study-eyebrow"></div>
+        <div class="topic-title" id="study-title"></div>
+        <div class="topic-desc" id="study-desc"></div>
+        <div id="goal-box-container"></div>
+      </div>
+      <div class="time-bar">
+        <div class="time-seg"><div class="time-seg-fill"></div></div>
+        <div class="time-seg"><div class="time-seg-fill"></div></div>
+        <div class="time-seg"><div class="time-seg-fill"></div></div>
+        <div class="time-seg"><div class="time-seg-fill"></div></div>
+      </div>
+      <div id="resource-list"><div id="resource-content"></div></div>
+      <div class="study-nav">
+        <button class="nav-btn" onclick="showGreeting()">&#8592; Back to plan</button>
+        <div style="display:flex;gap:10px;">
+          <button class="nav-btn test-btn" onclick="startTest(currentWeek)">&#9889; Take practice test</button>
+          <button class="nav-btn primary" onclick="markDone()">Mark studied &#10003;</button>
+        </div>
+      </div>
+    </div>
+    <div id="view-test">
+      <div class="test-header-bar">
+        <div class="test-meta" id="test-eyebrow"></div>
+        <div class="test-title" id="test-title"></div>
+        <div class="test-subtitle" id="test-subtitle"></div>
+        <div class="test-info-row">
+          <span class="test-chip">15 questions</span>
+          <span class="test-chip">SciOly Div B level</span>
+          <span class="test-chip">MC + short answer</span>
+          <span class="test-chip">~25 min</span>
+        </div>
+      </div>
+      <div id="test-generating" class="test-generating">
+        <div class="test-spinner"></div>
+        <div class="test-gen-label" id="gen-label">Generating your practice test...</div>
+        <div class="test-gen-sub" id="gen-sub">Calibrating to SciOly Div B difficulty</div>
+      </div>
+      <div id="test-error" class="error-box" style="display:none;"></div>
+      <div id="test-body" class="test-body" style="display:none;"></div>
+      <div id="score-summary" class="score-summary"></div>
+      <div id="score-bar-wrap" class="score-bar-wrap" style="display:none;">
+        <div class="score-bar-label"><span>Progress</span><span id="score-bar-text">0 / 0</span></div>
+        <div class="score-bar-track"><div class="score-bar-fill" id="score-bar-fill" style="width:0%"></div></div>
+      </div>
+      <div class="test-nav">
+        <button class="nav-btn" onclick="showGreeting()">&#8592; Back to plan</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="nav-btn" onclick="startWeek(currentWeek)">&#128218; Review material</button>
+          <button class="submit-btn" id="submit-btn" onclick="submitTest()" style="display:none;">Submit answers</button>
+          <button class="submit-btn" id="retry-btn" onclick="startTest(currentWeek)" style="display:none;">Retry test &#8635;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PLAN=[
+  {week:1,name:"What is food science?",sub:"Intro + careers",goal:"Explain what food science is and name its 4 major branches.",goalItems:["Define food science and distinguish it from nutrition and cooking","Name 4 branches: chemistry, microbiology, engineering, sensory science","Describe 2-3 careers a food scientist can pursue","Explain why the scientific method matters in food research"],concepts:["Food science definition","Nutrition basics","Food industry careers","Scientific method"],desc:"Overview of food science as a discipline, its history, and what food scientists do."},
+  {week:2,name:"Macronutrients",sub:"Carbs, proteins, fats",goal:"Describe the structure and role of each macronutrient and calculate caloric density.",goalItems:["Name the three macronutrients and their caloric density (carbs=4, protein=4, fat=9 kcal/g)","Distinguish monosaccharides, disaccharides, and polysaccharides","Explain what amino acids are and why protein structure matters in cooking","Differentiate saturated vs unsaturated fats"],concepts:["Carbohydrates","Proteins","Lipids","Caloric density","Macronutrient roles"],desc:"Structure and function of carbohydrates, proteins, and lipids in food and the body."},
+  {week:3,name:"Micronutrients & water",sub:"Vitamins, minerals",goal:"Classify vitamins and minerals and explain their food sources and deficiency effects.",goalItems:["List the 4 fat-soluble vitamins (A, D, E, K) and explain why they are stored in the body","Name at least 4 water-soluble vitamins and give a food source for each","Distinguish macrominerals from trace minerals with examples","Explain 3 functions of water in the body"],concepts:["Fat-soluble vitamins","Water-soluble vitamins","Major minerals","Trace minerals","Hydration"],desc:"Vitamins, minerals, and water -- what they do and where they are found in food."},
+  {week:4,name:"Food chemistry basics",sub:"pH, acids, bases",goal:"Explain the pH scale and distinguish the Maillard reaction from caramelization.",goalItems:["Explain the pH scale and classify common foods as acidic or basic","Describe the Maillard reaction: what reacts, what temperature, what result","Describe caramelization: what reacts, what temperature, what result","State the key difference between Maillard and caramelization"],concepts:["pH scale","Acids in food","Bases in food","Maillard reaction","Caramelization"],desc:"Chemical properties of food: pH, acids, bases, and how they affect flavor and preservation."},
+  {week:5,name:"Food microbiology",sub:"Bacteria, yeast, mold",goal:"Classify food microorganisms and explain yeast fermentation chemistry.",goalItems:["Distinguish bacteria, yeast, and mold with food examples","Explain the yeast fermentation equation: glucose -> CO2 + ethanol","Name 3 beneficial microbes and what they produce","Name 3 common foodborne pathogens and symptoms"],concepts:["Bacteria in food","Yeast fermentation","Mold","Foodborne illness","Beneficial microbes"],desc:"Microorganisms in food -- helpful and harmful -- and how they affect safety and flavor."},
+  {week:6,name:"Food preservation",sub:"Techniques & science",goal:"Explain the science behind 5+ food preservation methods.",goalItems:["Explain why canning works (heat + vacuum seal)","Distinguish pasteurization from sterilization","Explain how dehydration prevents spoilage","Describe why fermentation and pickling preserve food"],concepts:["Canning","Freezing","Dehydration","Fermentation","Pasteurization","Pickling"],desc:"Methods for preserving food: canning, freezing, drying, fermentation, and more."},
+  {week:7,name:"Food safety & HACCP",sub:"Danger zone, pathogens",goal:"Identify food safety hazards and explain all 7 HACCP principles in order.",goalItems:["State the temperature danger zone (40F-140F) and the 2-hour rule","Explain cross-contamination and prevention","Name and explain all 7 HACCP principles in order","Define CCP and give a real example"],concepts:["Temperature danger zone","Cross-contamination","HACCP","Pathogens","Personal hygiene"],desc:"Principles of food safety, the temperature danger zone, and HACCP concepts."},
+  {week:8,name:"Food additives & labels",sub:"Preservatives, emulsifiers",goal:"Read a food label and classify common additives by function.",goalItems:["Name the 5 major categories of food additives with examples","Explain what an emulsifier does at the molecular level","Read an ingredient list and identify preservatives, colorants, and emulsifiers","Interpret a Nutrition Facts label: % Daily Value, serving size, added sugars"],concepts:["Preservatives","Emulsifiers","Coloring agents","Flavor enhancers","Label reading"],desc:"What additives do, how emulsifiers work, and how to read a food label."},
+  {week:9,name:"Sensory evaluation",sub:"Taste, texture, appearance",goal:"Describe the 5 senses in food evaluation and explain sensory panel methods.",goalItems:["Name the 5 basic tastes and the receptor mechanism for each","Explain why smell accounts for ~80% of perceived flavor","Define texture attributes: viscosity, crunchiness, mouthfeel","Describe how a triangle test works"],concepts:["5 basic tastes","Olfaction","Texture & mouthfeel","Appearance","Sensory panel methods"],desc:"The science of how we perceive food: taste, smell, texture, color, and appearance."},
+  {week:10,name:"Food processing",sub:"Thermal, mechanical",goal:"Describe 5 major industrial food processing techniques.",goalItems:["Explain pasteurization vs UHT processing","Describe homogenization and why it prevents cream separation","Explain extrusion and name 2 food products made this way","Distinguish freeze-drying from dehydration"],concepts:["Pasteurization","Homogenization","Extrusion","Milling","Freeze-drying"],desc:"How food is processed industrially: heat treatment, milling, extrusion, and more."},
+  {week:11,name:"Nutrition science",sub:"Metabolism, diet, labels",goal:"Read a Nutrition Facts label fluently and explain basic metabolism.",goalItems:["Explain catabolism vs anabolism","Calculate calories from a label using the 4-4-9 rule","Explain what % Daily Value means (5%=low, 20%=high)","Distinguish naturally occurring from added sugars"],concepts:["Metabolism","Nutrition Facts label","Daily values","Dietary fiber","Added sugars"],desc:"How the body uses nutrients, reading nutrition facts labels, and dietary guidelines."},
+  {week:12,name:"Food lab techniques",sub:"Testing & analysis",goal:"Describe and interpret results for 4 classic food lab tests.",goalItems:["Benedict's test: reagent color, positive result (brick red), detects reducing sugars","Iodine test: positive result (blue-black), detects starch","Biuret test: positive result (purple), detects protein","Paper chromatography: separating food dyes using Rf values"],concepts:["Benedict's test","Iodine test","Biuret test","Chromatography","Titration"],desc:"Lab skills used in food science: titration, Benedict's test, chromatography, and more."},
+  {week:13,name:"Special topics",sub:"GMOs, organic, sustainability",goal:"Explain GMOs, organic certification, and food sustainability issues.",goalItems:["Define GMO and give 2 examples with their purpose","State 3 differences between USDA organic and conventional farming","Explain 2 arguments for and against lab-grown meat","Define food security and name 2 threats"],concepts:["GMOs","Organic certification","Sustainable food","Lab-grown meat","Food security"],desc:"Contemporary issues: GMOs, organic food, food sustainability, and future food technology."},
+  {week:14,name:"Full review & test prep",sub:"Practice + exam strategies",goal:"Feel confident across all 13 topic areas and ready for competition day.",goalItems:["Recall key facts from all 13 weeks without notes","Know SciOly lab strategy: read instructions first, record units, show work","Know common gotchas: Maillard vs caramelization temps, fat vs water-soluble vitamins, HACCP in order","Complete at least one full practice test timed"],concepts:["All-topics review","Test strategies","Key formulas","Common SciOly pitfalls"],desc:"Comprehensive review of all topics with practice questions and test-day strategies."},
+];
+
+const YT=q=>"https://www.youtube.com/results?search_query="+encodeURIComponent(q);
+const GS=q=>"https://www.google.com/search?q="+encodeURIComponent(q);
+
+const RES={
+  1:{resources:[
+    {type:"video",title:"What is Food Science?",source:"YouTube - IFT",desc:"A 10-minute intro explaining what food scientists do day to day, from flavor labs to food safety testing.",time:"10 min",url:YT("what is food science introduction IFT career overview")},
+    {type:"video",title:"The Scientific Method - Crash Course Biology",source:"YouTube - CrashCourse",desc:"How scientists design experiments -- the foundation for every SciOly lab station.",time:"10 min",url:YT("scientific method crash course biology")},
+    {type:"read",title:"About Food Science and Technology",source:"IFT.org",desc:"IFT's official overview of food science branches: chemistry, microbiology, engineering, sensory science.",time:"20 min",url:"https://www.ift.org/career-development/learn-about-food-science/food-facts/about-fs-and-t"},
+    {type:"read",title:"How to Make Healthy Food Choices",source:"KidsHealth",desc:"Age-appropriate intro to nutrition basics -- food groups, macronutrients, and balanced diet.",time:"15 min",url:"https://kidshealth.org/en/kids/pyramid.html"},
+    {type:"activity",title:"Food Scientist for a Day",source:"SciOly prep activity",desc:"Write 5 food questions you have always wondered about. Save the list; you will answer all of them by Week 14!",time:"20 min",url:null},
+  ]},
+  2:{resources:[
+    {type:"video",title:"Carbohydrates - Structure & Function",source:"YouTube - Bozeman Science",desc:"Monosaccharides, disaccharides, and polysaccharides with real food examples like starch, glucose, and fiber.",time:"10 min",url:YT("carbohydrates structure function Bozeman Science")},
+    {type:"video",title:"Proteins & Amino Acids in Food",source:"YouTube - TED-Ed",desc:"How amino acid chains fold into proteins and why protein structure matters in cooking.",time:"8 min",url:YT("proteins amino acids food science TED-Ed")},
+    {type:"video",title:"Lipids: Fats and Oils Explained",source:"YouTube - Bozeman Science",desc:"Saturated vs unsaturated fats, omega fatty acids, and why fat is essential for absorbing vitamins A, D, E, K.",time:"9 min",url:YT("lipids fats oils Bozeman Science biology")},
+    {type:"read",title:"Macronutrients: Carbohydrate, Protein, and Fat",source:"McKinley Health Center",desc:"Clear explanation of all three macronutrients -- caloric density, roles in the body, and the 4-4-9 rule.",time:"20 min",url:"https://www.mckinley.illinois.edu/sites/default/files/docs/macronutrients.pdf"},
+    {type:"activity",title:"Macronutrient food label hunt",source:"Kitchen activity",desc:"Pick 5 pantry foods. Calculate caloric density for each: (carbs x4 + protein x4 + fat x9). Which is densest?",time:"25 min",url:null},
+  ]},
+  3:{resources:[
+    {type:"video",title:"Fat-Soluble Vitamins A, D, E, K",source:"YouTube - Armando Hasudungan",desc:"The four fat-soluble vitamins, where they are stored, food sources, and classic deficiency diseases.",time:"12 min",url:YT("fat soluble vitamins ADEK explained")},
+    {type:"video",title:"Water-Soluble Vitamins: B Complex & Vitamin C",source:"YouTube - Ninja Nerd",desc:"Why B vitamins and vitamin C are not stored long-term, and deficiency diseases like scurvy and beriberi.",time:"14 min",url:YT("water soluble vitamins B complex vitamin C explained")},
+    {type:"video",title:"Minerals Your Body Needs -- and Why",source:"YouTube - SciShow",desc:"Calcium, iron, potassium, zinc -- what each mineral does and consequences of deficiency.",time:"8 min",url:YT("minerals body needs calcium iron zinc SciShow")},
+    {type:"read",title:"Vitamins - MedlinePlus Medical Encyclopedia",source:"MedlinePlus (NIH)",desc:"All 13 essential vitamins, fat-soluble vs water-soluble classification, food sources, and deficiency effects.",time:"20 min",url:"https://medlineplus.gov/ency/article/002399.htm"},
+    {type:"read",title:"Minerals - MedlinePlus",source:"MedlinePlus (NIH)",desc:"Macrominerals (calcium, magnesium, potassium) and trace minerals (iron, zinc, iodine) with their functions.",time:"15 min",url:"https://medlineplus.gov/minerals.html"},
+    {type:"activity",title:"Vitamin & mineral scavenger hunt chart",source:"Prep activity",desc:"List 10 vitamins/minerals. For each find 2 foods in your kitchen that contain it. Best memorization method!",time:"25 min",url:null},
+  ]},
+  4:{resources:[
+    {type:"video",title:"pH and the Chemistry of Food",source:"YouTube - Reactions (ACS)",desc:"How pH affects food taste, preservation, and texture -- with excellent real food examples.",time:"8 min",url:YT("pH chemistry of food Reactions ACS American Chemical Society")},
+    {type:"video",title:"The Maillard Reaction Explained",source:"YouTube - SciShow",desc:"Why food turns brown and delicious -- the amino acid + reducing sugar reaction behind toast and grilled meat.",time:"8 min",url:YT("Maillard reaction explained SciShow food browning")},
+    {type:"video",title:"Caramelization vs Maillard Reaction",source:"YouTube",desc:"SciOly classic: caramelization (sugar only, ~160C) vs Maillard (sugar + protein, ~140C). Know both temperatures!",time:"7 min",url:YT("caramelization vs Maillard reaction difference food science temperature")},
+    {type:"read",title:"Acids and Bases in Everyday Food",source:"Google search",desc:"How acids and bases appear in common foods -- citrus (pH ~2), vinegar (~3), baking soda (~9).",time:"15 min",url:GS("acids and bases in everyday food pH examples chemistry")},
+    {type:"activity",title:"Red cabbage pH indicator lab",source:"Home lab",desc:"Boil red cabbage, collect purple liquid as a natural pH indicator. Test 5 kitchen liquids and rank by pH.",time:"40 min",url:GS("red cabbage pH indicator experiment home lab science")},
+  ]},
+  5:{resources:[
+    {type:"video",title:"Bacteria in Food -- Friend or Foe?",source:"YouTube - SciShow",desc:"From harmful Salmonella to helpful bacteria that make yogurt, cheese, and sourdough.",time:"9 min",url:YT("bacteria in food friend or foe SciShow")},
+    {type:"video",title:"How Yeast Works -- Fermentation Explained",source:"YouTube - TED-Ed",desc:"Yeast fermentation: glucose -> CO2 + ethanol, why bread rises, and how beer and wine are made.",time:"7 min",url:YT("yeast fermentation explained TED-Ed bread rising")},
+    {type:"video",title:"Mold: The Good, the Bad, and the Delicious",source:"YouTube - SciShow",desc:"How mold grows, which are dangerous, and which are used in blue cheese and soy sauce.",time:"8 min",url:YT("mold food good bad SciShow")},
+    {type:"read",title:"Foodborne Illness -- Major Pathogens (CDC)",source:"CDC.gov",desc:"Salmonella, Campylobacter, Listeria, norovirus, E. coli -- illness numbers and prevention.",time:"20 min",url:"https://www.cdc.gov/food-safety/php/data-research/foodborne-illness-burden/index.html"},
+    {type:"activity",title:"Yeast fermentation balloon observation",source:"Kitchen lab",desc:"1 tsp yeast + 1 tsp sugar + 1/4 cup warm water in a bottle with a balloon stretched over the top. Watch 15 min.",time:"30 min",url:null},
+  ]},
+  6:{resources:[
+    {type:"video",title:"How Food Preservation Works",source:"YouTube - SciShow",desc:"Overview of major preservation techniques and why each one stops microbial growth.",time:"10 min",url:YT("how food preservation works science SciShow")},
+    {type:"video",title:"Pasteurization -- The History and Science",source:"YouTube - TED-Ed",desc:"How Louis Pasteur discovered that heating kills harmful microbes, and how it is used today.",time:"6 min",url:YT("pasteurization history science TED-Ed Louis Pasteur")},
+    {type:"video",title:"Fermentation as Food Preservation",source:"YouTube - SciShow",desc:"How fermentation lowers pH to prevent spoilage -- from ancient beverages to kimchi and kombucha.",time:"10 min",url:YT("fermentation food preservation history microbes science")},
+    {type:"read",title:"Food Preservation Methods - NCHFP",source:"nchfp.uga.edu",desc:"The definitive US reference on canning, freezing, dehydrating, fermenting, and pickling.",time:"20 min",url:"https://nchfp.uga.edu/"},
+    {type:"activity",title:"Compare preserved vs fresh food",source:"Kitchen observation",desc:"Fresh vs canned tomatoes, fresh vs frozen peas, or fresh vs dried apricots. Record color, texture, smell, taste.",time:"30 min",url:null},
+  ]},
+  7:{resources:[
+    {type:"video",title:"Food Safety: The Temperature Danger Zone",source:"YouTube",desc:"Why bacteria grow fastest 40F-140F (4C-60C) and the 2-hour rule every food handler must know.",time:"8 min",url:YT("food safety temperature danger zone 40 140 degrees bacteria growth")},
+    {type:"video",title:"Cross-Contamination in the Kitchen",source:"YouTube",desc:"How pathogens spread via hands, cutting boards, and utensils -- with practical prevention strategies.",time:"7 min",url:YT("cross contamination kitchen prevention food safety")},
+    {type:"video",title:"What is HACCP?",source:"YouTube",desc:"Hazard Analysis and Critical Control Points -- how the food industry identifies and prevents contamination.",time:"8 min",url:YT("what is HACCP food safety hazard analysis critical control points explained")},
+    {type:"read",title:"HACCP Principles & Application Guidelines",source:"FDA.gov",desc:"The FDA official explanation of all 7 HACCP principles with real examples -- the definitive SciOly reference.",time:"20 min",url:"https://www.fda.gov/food/hazard-analysis-critical-control-point-haccp/haccp-principles-application-guidelines"},
+    {type:"activity",title:"Kitchen food safety audit",source:"Home activity",desc:"Check fridge temp (under 40F), raw meat on bottom shelf, separate cutting boards. Write a safety report.",time:"25 min",url:null},
+  ]},
+  8:{resources:[
+    {type:"video",title:"Food Additives: What They Are and Why",source:"YouTube - SciShow",desc:"Preservatives, emulsifiers, colorants, and flavor enhancers -- why each one is used.",time:"9 min",url:YT("food additives what are they used for SciShow")},
+    {type:"video",title:"How to Read a Food Label",source:"YouTube - FDA",desc:"Step-by-step: serving size, daily values, ingredient list order by weight, and added sugars.",time:"8 min",url:YT("how to read a food label nutrition facts FDA step by step updated")},
+    {type:"video",title:"Emulsifiers: How Mayonnaise Does Not Separate",source:"YouTube",desc:"How lecithin keeps oil and water mixed using hydrophilic and hydrophobic ends.",time:"7 min",url:YT("emulsifiers food chemistry mayonnaise lecithin oil water hydrophilic")},
+    {type:"read",title:"Food Additives & GRAS Ingredients - FDA",source:"FDA.gov",desc:"FDA consumer overview of food additives: what they are, why used, how regulated, what GRAS means.",time:"20 min",url:"https://www.fda.gov/food/food-additives-and-gras-ingredients-information-consumers"},
+    {type:"activity",title:"Ingredient label detective",source:"Kitchen activity",desc:"Find 5 packaged foods. List every additive. Classify as: preservative, emulsifier, colorant, flavor enhancer, or texture agent.",time:"30 min",url:null},
+  ]},
+  9:{resources:[
+    {type:"video",title:"The Science of Taste",source:"YouTube - TED-Ed",desc:"How taste buds detect sweet, salty, sour, bitter, and umami -- and why smell is ~80% of flavor.",time:"7 min",url:YT("science of taste sweet salty sour bitter umami TED-Ed")},
+    {type:"video",title:"How Does Your Sense of Smell Work?",source:"YouTube - TED-Ed",desc:"The olfactory system and how airborne molecules trigger smell receptors -- critical for flavor perception.",time:"5 min",url:YT("how does sense of smell work olfaction TED-Ed")},
+    {type:"video",title:"Food Texture and Mouthfeel",source:"YouTube",desc:"How food scientists measure crunchiness, creaminess, and viscosity -- and why texture affects enjoyment.",time:"8 min",url:YT("food texture mouthfeel science crunchiness viscosity engineering")},
+    {type:"read",title:"Sensory Evaluation Methods - overview",source:"Google search",desc:"Triangle test, hedonic scale, ranking panels -- the methods sensory scientists use to rate food.",time:"20 min",url:GS("sensory evaluation of food triangle test hedonic scale panel methods overview")},
+    {type:"activity",title:"Blind taste test triangle panel",source:"Home activity",desc:"2 identical samples + 1 slightly different. Blindfold a taster -- can they pick the odd one out? Try with 3 tasters.",time:"35 min",url:null},
+  ]},
+  10:{resources:[
+    {type:"video",title:"How Milk is Processed",source:"YouTube - How It's Made",desc:"Pasteurization (72C for 15 sec) and homogenization (breaking fat globules to prevent separation).",time:"8 min",url:YT("how milk is processed pasteurization homogenization industrial how its made")},
+    {type:"video",title:"Food Extrusion -- How Cereal is Made",source:"YouTube - How It's Made",desc:"How extruders force dough through shaped dies under heat and pressure to create cereals and snacks.",time:"7 min",url:YT("food extrusion cereal pasta processing how its made")},
+    {type:"video",title:"Freeze Drying Food -- How It Works",source:"YouTube - SciShow",desc:"How removing water by sublimation preserves nutrients and flavor far better than regular dehydration.",time:"8 min",url:YT("freeze drying food how it works sublimation science")},
+    {type:"read",title:"Food Processing Methods - overview",source:"Google search",desc:"Thermal (pasteurization, sterilization), mechanical (milling, extrusion), cold (freeze-drying) processing explained.",time:"20 min",url:GS("food processing methods thermal mechanical pasteurization extrusion freeze drying overview science")},
+    {type:"activity",title:"Compare processing levels in your pantry",source:"Kitchen activity",desc:"Minimally processed (apple), moderately (canned peaches), highly (fruit snack). Compare labels and nutrients.",time:"25 min",url:null},
+  ]},
+  11:{resources:[
+    {type:"video",title:"How Your Body Turns Food into Energy",source:"YouTube - TED-Ed",desc:"Metabolism basics: carbohydrates, fats, and proteins broken down into ATP -- the body's energy currency.",time:"8 min",url:YT("how body turns food into energy metabolism TED-Ed")},
+    {type:"video",title:"How to Read the Nutrition Facts Label",source:"YouTube - FDA",desc:"Official FDA guidance: serving sizes, daily values, added sugars, and what % DV actually means.",time:"7 min",url:YT("how to read nutrition facts label FDA updated 2020")},
+    {type:"video",title:"Dietary Fiber -- Why It Matters",source:"YouTube - SciShow",desc:"Soluble vs insoluble fiber, how fiber feeds gut bacteria and slows glucose absorption.",time:"7 min",url:YT("dietary fiber why it matters soluble insoluble SciShow")},
+    {type:"read",title:"Dietary Guidelines for Americans",source:"USDA DietaryGuidelines.gov",desc:"Main USDA recommendations: food groups, added sugars (under 10% of calories), sodium (under 2300 mg/day).",time:"20 min",url:"https://www.dietaryguidelines.gov/resources/2020-2025-dietary-guidelines-online-materials"},
+    {type:"activity",title:"One-day diet analysis",source:"Cronometer.com",desc:"Track one full day of eating. Which nutrients did you hit daily values for? Write 3 observations.",time:"30 min",url:"https://cronometer.com/"},
+  ]},
+  12:{resources:[
+    {type:"video",title:"Benedict's, Iodine & Biuret Tests Demonstrated",source:"YouTube - science lab",desc:"Side-by-side demo: Benedict's (brick red = reducing sugars), iodine (blue-black = starch), Biuret (purple = protein).",time:"12 min",url:YT("Benedict test iodine test Biuret test food science lab demonstration")},
+    {type:"video",title:"Paper Chromatography -- Separating Food Dyes",source:"YouTube",desc:"How chromatography separates dye components, how to calculate Rf values, and why it is used in food analysis.",time:"8 min",url:YT("paper chromatography food dyes separation Rf value science experiment")},
+    {type:"video",title:"Titration Explained",source:"YouTube - Tyler DeWitt",desc:"How titration measures acid or base concentration -- used in food science to test vitamin C and acidity.",time:"10 min",url:YT("titration explained acid base Tyler DeWitt chemistry")},
+    {type:"read",title:"Understanding FDA Food Additive Regulation",source:"FDA.gov",desc:"How the FDA regulates substances added to food -- useful context for lab analysis of food composition.",time:"15 min",url:"https://www.fda.gov/food/food-additives-and-gras-ingredients-information-consumers/understanding-how-fda-regulates-food-additives-and-gras-ingredients"},
+    {type:"activity",title:"Iodine starch test at home",source:"Home lab",desc:"Use iodine on bread, potato, rice, apple, and cheese. Record color changes in a data table. Write a conclusion.",time:"30 min",url:GS("iodine starch test home lab experiment food science instructions")},
+  ]},
+  13:{resources:[
+    {type:"video",title:"GMOs -- What Are They Really?",source:"YouTube - SciShow",desc:"What genetic modification involves, examples (Bt corn, Golden Rice), and the scientific consensus on safety.",time:"9 min",url:YT("GMOs genetically modified organisms what are they really SciShow")},
+    {type:"video",title:"What Does Organic Actually Mean?",source:"YouTube - SciShow",desc:"USDA organic certification, what farmers cannot use, and what research says about nutritional differences.",time:"8 min",url:YT("what does organic mean USDA certification farming SciShow")},
+    {type:"video",title:"Lab-Grown Meat -- The Future of Food?",source:"YouTube - Kurzgesagt",desc:"How cultured meat is grown from animal cells, current scaling challenges, and environmental tradeoffs.",time:"10 min",url:YT("lab grown meat cultured meat future food Kurzgesagt")},
+    {type:"read",title:"Food Safety and GMOs - FDA Overview",source:"FDA.gov",desc:"How the FDA evaluates genetically engineered foods for safety -- the regulatory side of the GMO debate.",time:"20 min",url:"https://www.fda.gov/food/agricultural-biotechnology/gmo-crops-animal-food-and-beyond"},
+    {type:"activity",title:"Food ethics debate prep",source:"Discussion activity",desc:"Pick GMOs, lab-grown meat, or organic food. Find 3 arguments FOR and 3 AGAINST. Write a 1-paragraph position.",time:"30 min",url:null},
+  ]},
+  14:{resources:[
+    {type:"video",title:"Food Science Full Review -- SciOly Div B",source:"YouTube search",desc:"Search for a recent SciOly Food Science review video -- updated each season with exact topics tested.",time:"20 min",url:YT("Science Olympiad Food Science review Div B 2024 2025")},
+    {type:"read",title:"SciOly Food Science Wiki",source:"Scioly.org",desc:"The community wiki covering all testable Food Science topics -- use as your final checklist.",time:"25 min",url:GS("site:scioly.org food science wiki topics")},
+    {type:"read",title:"Past Invitational Tests",source:"Google search",desc:"Free past tests from Highlands, TX A&M, UT Austin -- best practice for real SciOly question style.",time:"30 min",url:GS("Science Olympiad Food Science past tests invitational free Highlands Texas AM UT Austin")},
+    {type:"activity",title:"Flash card blitz -- all 14 weeks",source:"Review activity",desc:"One card per key concept. Front: question. Back: 2-sentence answer with a specific fact or number.",time:"40 min",url:null},
+    {type:"activity",title:"Answer your Week 1 questions",source:"Reflection activity",desc:"Return to your Week 1 list of 5 food questions. Answer each fully using course vocabulary.",time:"20 min",url:null},
+  ]},
+};
+
+const TESTS={
+  1:[
+    {type:"mc",q:"Which of the following BEST defines food science?",choices:["A. The art of cooking meals at home","B. The study of physical, chemical, and biological makeup of food","C. A diet and nutrition counseling program","D. The process of farming and harvesting crops"],answer:"B",explanation:"Food science applies chemistry, microbiology, and engineering to understand and improve food safety, nutrition, and quality."},
+    {type:"mc",q:"Which of these is NOT a major branch of food science?",choices:["A. Food chemistry","B. Food microbiology","C. Food psychology","D. Food engineering"],answer:"C",explanation:"The four main branches are food chemistry, microbiology, engineering, and sensory science. Psychology is not a branch."},
+    {type:"mc",q:"A food scientist developing a new yogurt product would MOST directly use which branch?",choices:["A. Food engineering","B. Food microbiology","C. Sensory science","D. Food packaging"],answer:"B",explanation:"Yogurt production relies on bacterial fermentation, which falls squarely under food microbiology."},
+    {type:"mc",q:"The scientific method requires that an experiment must be:",choices:["A. Fast and inexpensive","B. Reproducible and based on a testable hypothesis","C. Performed by a licensed scientist","D. Conducted in a laboratory setting only"],answer:"B",explanation:"A valid scientific experiment must have a testable hypothesis and be reproducible by other scientists."},
+    {type:"mc",q:"Which of the following is a PRIMARY role of a food safety scientist?",choices:["A. Developing new cooking recipes","B. Ensuring food products are free from harmful contaminants","C. Designing restaurant menus","D. Growing crops using organic methods"],answer:"B",explanation:"Food safety scientists focus on identifying and preventing biological, chemical, and physical hazards in the food supply."},
+    {type:"mc",q:"The Institute of Food Technologists (IFT) is best described as:",choices:["A. A government food safety agency","B. A professional society for food scientists","C. A chain of food testing laboratories","D. A USDA regulatory body"],answer:"B",explanation:"IFT is an international non-profit scientific society of food science professionals, not a government agency."},
+    {type:"mc",q:"Which career would a food science degree MOST directly prepare you for?",choices:["A. Veterinarian","B. Food product developer at a snack company","C. Marine biologist","D. Agricultural economist"],answer:"B",explanation:"Food product developers use food science to formulate, test, and improve food products."},
+    {type:"sa",q:"Name two differences between food science and nutrition science.",answer:"Food science focuses on the physical, chemical, and biological properties of food and how it is processed and preserved. Nutrition science focuses on how the body uses nutrients from food and how diet affects health. Food scientists design and test food products; nutritionists counsel people on healthy eating.",explanation:""},
+    {type:"mc",q:"A food technologist differs from a chef primarily because a food technologist:",choices:["A. Focuses on flavor above all else","B. Applies scientific principles to large-scale food production","C. Only works with organic ingredients","D. Cooks for restaurants rather than factories"],answer:"B",explanation:"Food technologists apply scientific disciplines to develop and improve food products for large-scale manufacturing."},
+    {type:"mc",q:"Which step of the scientific method comes immediately AFTER forming a hypothesis?",choices:["A. Drawing a conclusion","B. Analyzing data","C. Designing and conducting an experiment","D. Reporting results"],answer:"C",explanation:"After forming a hypothesis, you design and conduct an experiment to test it."},
+    {type:"mc",q:"Food deterioration can be caused by all of the following EXCEPT:",choices:["A. Microbial growth","B. Enzymatic activity","C. Plastic packaging","D. Chemical oxidation"],answer:"C",explanation:"Plastic packaging protects food -- it does not cause deterioration. Microbial growth, enzymes, and oxidation all cause spoilage."},
+    {type:"mc",q:"Which of the following best describes sensory science in food science?",choices:["A. The study of how microbes affect food flavor","B. The scientific evaluation of food using human senses","C. The chemical analysis of food composition","D. The engineering of food processing equipment"],answer:"B",explanation:"Sensory science uses trained human panels to evaluate food appearance, aroma, taste, texture, and mouthfeel."},
+    {type:"sa",q:"Give one example of how food science benefits public health.",answer:"Food science improves public health by developing pasteurization techniques that kill harmful pathogens in milk and juice, reducing foodborne illness. It also helps formulate fortified foods (e.g., Vitamin D in milk) to prevent nutrient deficiencies across large populations.",explanation:""},
+    {type:"mc",q:"In an experiment testing whether salt concentration affects bread rise, the INDEPENDENT variable is:",choices:["A. The height of the bread","B. The amount of yeast","C. The salt concentration","D. The baking temperature"],answer:"C",explanation:"The independent variable is the one you deliberately change -- the salt concentration. Bread height is the dependent variable."},
+    {type:"mc",q:"Which of the following is the BEST example of food engineering?",choices:["A. Testing whether consumers prefer sweet or salty chips","B. Designing a machine that fills 500 bottles with juice per minute","C. Culturing bacteria to make cheese","D. Analyzing the vitamin content of an apple"],answer:"B",explanation:"Food engineering focuses on designing and optimizing equipment and processes used in large-scale food manufacturing."},
+  ],
+  2:[
+    {type:"mc",q:"Which macronutrient provides 9 kilocalories per gram?",choices:["A. Carbohydrates","B. Protein","C. Fat","D. Fiber"],answer:"C",explanation:"Fat provides 9 kcal/g -- more than double the 4 kcal/g provided by both carbohydrates and protein."},
+    {type:"mc",q:"Glucose, fructose, and galactose are all examples of:",choices:["A. Disaccharides","B. Polysaccharides","C. Monosaccharides","D. Amino acids"],answer:"C",explanation:"Monosaccharides are single sugar units -- the simplest form of carbohydrate."},
+    {type:"mc",q:"Sucrose (table sugar) is a disaccharide made of:",choices:["A. Glucose + glucose","B. Glucose + fructose","C. Glucose + galactose","D. Fructose + galactose"],answer:"B",explanation:"Sucrose is composed of one glucose and one fructose molecule joined by a glycosidic bond."},
+    {type:"mc",q:"When a protein is denatured by heat, which of the following occurs?",choices:["A. The amino acid sequence changes","B. The protein's 3D shape unfolds and changes","C. The protein gains more peptide bonds","D. The protein converts to a carbohydrate"],answer:"B",explanation:"Denaturation disrupts the bonds holding the protein's 3D shape, causing it to unfold -- not the amino acid sequence."},
+    {type:"mc",q:"A food label shows 30g carbohydrates, 10g protein, and 5g fat per serving. How many total kilocalories?",choices:["A. 180 kcal","B. 205 kcal","C. 225 kcal","D. 275 kcal"],answer:"B",explanation:"(30x4) + (10x4) + (5x9) = 120 + 40 + 45 = 205 kcal."},
+    {type:"mc",q:"Which of the following is a saturated fatty acid?",choices:["A. Oleic acid (olive oil)","B. Linoleic acid (sunflower oil)","C. Palmitic acid (palm oil)","D. EPA (fish oil)"],answer:"C",explanation:"Palmitic acid is saturated -- all carbon-carbon bonds are single bonds. Oleic, linoleic, and EPA are all unsaturated."},
+    {type:"mc",q:"Starch is a polysaccharide made of many units of which monomer?",choices:["A. Fructose","B. Galactose","C. Sucrose","D. Glucose"],answer:"D",explanation:"Starch is a polymer of glucose units linked by alpha-1,4 glycosidic bonds."},
+    {type:"sa",q:"Explain why fats provide more than twice the calories per gram compared to carbohydrates.",answer:"Fats are primarily carbon and hydrogen atoms with very little oxygen, making them highly reduced molecules with more chemical energy stored per gram. Carbohydrates already contain significant oxygen (roughly one oxygen per carbon), so less additional energy is released when they are oxidized. This is why fat provides 9 kcal/g while carbohydrates and protein each provide only 4 kcal/g.",explanation:""},
+    {type:"mc",q:"Which of the following is an essential amino acid?",choices:["A. Alanine","B. Glycine","C. Lysine","D. Serine"],answer:"C",explanation:"Lysine is one of the 9 essential amino acids -- it cannot be made by the body and must come from food."},
+    {type:"mc",q:"The process by which cooking turns egg white from clear to white and solid is called:",choices:["A. Fermentation","B. Hydrolysis","C. Denaturation","D. Caramelization"],answer:"C",explanation:"Heat denatures the proteins in egg white, causing them to unfold and aggregate, changing texture and appearance."},
+    {type:"mc",q:"Which type of fat is associated with increased risk of cardiovascular disease?",choices:["A. Monounsaturated fats","B. Polyunsaturated fats","C. Saturated fats","D. Omega-3 fatty acids"],answer:"C",explanation:"High intake of saturated fats is associated with elevated LDL cholesterol and increased cardiovascular disease risk."},
+    {type:"mc",q:"Dietary fiber is a type of:",choices:["A. Protein","B. Monosaccharide","C. Polysaccharide","D. Lipid"],answer:"C",explanation:"Dietary fiber (cellulose, pectin, etc.) consists of polysaccharides that humans cannot digest."},
+    {type:"sa",q:"A granola bar has 250 kcal total, 10g fat, and 20g carbohydrates. How many grams of protein does it contain?",answer:"Energy from fat: 10 x 9 = 90 kcal. Energy from carbohydrates: 20 x 4 = 80 kcal. Remaining for protein: 250 - 90 - 80 = 80 kcal. Grams of protein: 80 divided by 4 = 20 grams of protein.",explanation:""},
+    {type:"mc",q:"Phospholipids are important in cell membranes because they are:",choices:["A. Fully saturated and rigid","B. Amphipathic (hydrophilic and hydrophobic regions)","C. Composed entirely of glucose","D. Insoluble in both water and oil"],answer:"B",explanation:"Phospholipids have a hydrophilic phosphate head and hydrophobic fatty acid tails, forming the bilayer of cell membranes."},
+    {type:"mc",q:"Which food is the BEST source of complete protein (all essential amino acids)?",choices:["A. White rice","B. Kidney beans","C. Whole egg","D. Corn tortilla"],answer:"C",explanation:"Whole eggs contain all 9 essential amino acids in proportions ideal for human nutrition."},
+  ],
+  3:[
+    {type:"mc",q:"Which vitamins are fat-soluble?",choices:["A. Vitamins B and C","B. Vitamins A, D, E, and K","C. Vitamins A, B, C, and D","D. Vitamins C, D, E, and K"],answer:"B",explanation:"The four fat-soluble vitamins are A, D, E, and K -- remembered by the acronym ADEK."},
+    {type:"mc",q:"Scurvy is caused by a deficiency of which vitamin?",choices:["A. Vitamin A","B. Vitamin B12","C. Vitamin C","D. Vitamin D"],answer:"C",explanation:"Scurvy results from vitamin C deficiency. Vitamin C is essential for collagen synthesis."},
+    {type:"mc",q:"Why are fat-soluble vitamins potentially toxic if consumed in excess?",choices:["A. They convert to sugar in the bloodstream","B. They are stored in fatty tissues and can accumulate to harmful levels","C. They interfere with protein synthesis","D. They are excreted too quickly"],answer:"B",explanation:"Unlike water-soluble vitamins (excreted in urine), fat-soluble vitamins are stored in fat tissue and can build up to toxic levels."},
+    {type:"mc",q:"Which mineral is most important for bone health and is found in high amounts in dairy?",choices:["A. Iron","B. Sodium","C. Calcium","D. Potassium"],answer:"C",explanation:"Calcium is essential for bone and tooth formation, muscle function, and nerve signaling."},
+    {type:"mc",q:"Beriberi is a disease caused by deficiency of:",choices:["A. Vitamin D","B. Thiamine (Vitamin B1)","C. Vitamin K","D. Niacin (Vitamin B3)"],answer:"B",explanation:"Beriberi is caused by thiamine (B1) deficiency and affects the nervous and cardiovascular systems."},
+    {type:"mc",q:"Which of the following is a trace mineral?",choices:["A. Calcium","B. Potassium","C. Iron","D. Magnesium"],answer:"C",explanation:"Trace minerals are needed in very small amounts. Iron is a trace mineral; calcium, potassium, and magnesium are macrominerals."},
+    {type:"mc",q:"Water makes up approximately what percentage of the human body?",choices:["A. 30-40%","B. 45-50%","C. 55-65%","D. 75-85%"],answer:"C",explanation:"Water makes up approximately 55-65% of adult body weight, varying by age, sex, and muscle mass."},
+    {type:"sa",q:"Explain why a strict vegan might need to take a vitamin B12 supplement.",answer:"Vitamin B12 is found almost exclusively in animal products (meat, fish, dairy, eggs). Plants do not produce B12. A strict vegan who consumes no animal products cannot obtain adequate B12 from food alone and must supplement to prevent B12 deficiency, which causes nerve damage and anemia.",explanation:""},
+    {type:"mc",q:"Which vitamin is called the sunshine vitamin because the body can synthesize it from sunlight?",choices:["A. Vitamin A","B. Vitamin C","C. Vitamin D","D. Vitamin E"],answer:"C",explanation:"Vitamin D is synthesized in the skin when exposed to UVB radiation from sunlight."},
+    {type:"mc",q:"Iron deficiency most commonly causes which condition?",choices:["A. Rickets","B. Anemia","C. Scurvy","D. Osteoporosis"],answer:"B",explanation:"Iron is essential for hemoglobin production. Iron deficiency results in fewer red blood cells -- iron-deficiency anemia."},
+    {type:"mc",q:"Which of the following is a PRIMARY function of water in the body?",choices:["A. Providing caloric energy","B. Regulating body temperature through sweating","C. Building muscle tissue","D. Storing fat-soluble vitamins"],answer:"B",explanation:"Water regulates body temperature through evaporative cooling (sweating), and also transports nutrients and participates in metabolic reactions."},
+    {type:"mc",q:"Rickets in children is associated with deficiency of which vitamin?",choices:["A. Vitamin A","B. Vitamin B6","C. Vitamin C","D. Vitamin D"],answer:"D",explanation:"Vitamin D deficiency impairs calcium absorption, leading to soft, weak bones in children -- rickets."},
+    {type:"sa",q:"Describe one food source and one function of each: Vitamin A, Vitamin K, and Iron.",answer:"Vitamin A: found in liver, carrots, sweet potatoes; essential for vision (especially night vision) and immune function. Vitamin K: found in leafy greens like spinach and kale; essential for blood clotting. Iron: found in red meat, beans, fortified cereals; component of hemoglobin in red blood cells, carrying oxygen throughout the body.",explanation:""},
+    {type:"mc",q:"Which group of vitamins must be consumed regularly because they are not stored in the body?",choices:["A. Fat-soluble vitamins","B. Water-soluble vitamins","C. Vitamins A, D, E, K","D. Minerals"],answer:"B",explanation:"Water-soluble vitamins (C and the 8 B vitamins) are not stored; excess is excreted in urine, so they must be consumed regularly."},
+    {type:"mc",q:"Iodine is a trace mineral primarily needed for:",choices:["A. Red blood cell production","B. Thyroid hormone production","C. Bone strength","D. Immune system function"],answer:"B",explanation:"Iodine is essential for synthesis of thyroid hormones (T3 and T4), which regulate metabolism. Deficiency causes goiter."},
+  ],
+  4:[
+    {type:"mc",q:"On the pH scale, which statement is TRUE?",choices:["A. A pH of 7 is acidic","B. Lower pH numbers indicate more acidic solutions","C. A pH of 14 is neutral","D. Higher pH numbers indicate more acidic solutions"],answer:"B",explanation:"The pH scale runs from 0 (most acidic) to 14 (most basic), with 7 being neutral. Lower pH = more acidic."},
+    {type:"mc",q:"Lemon juice has a pH of approximately 2. This means it is:",choices:["A. Neutral","B. Slightly basic","C. Strongly acidic","D. Weakly acidic"],answer:"C",explanation:"A pH of 2 is strongly acidic -- on the lower end of the pH scale."},
+    {type:"mc",q:"The Maillard reaction occurs between:",choices:["A. Two sugar molecules","B. A reducing sugar and an amino acid","C. Two fat molecules","D. A vitamin and a mineral"],answer:"B",explanation:"The Maillard reaction is a chemical reaction between a reducing sugar (like glucose) and an amino acid (from proteins), producing brown color and complex flavors."},
+    {type:"mc",q:"At approximately what temperature does the Maillard reaction begin to occur significantly?",choices:["A. 60 C (140 F)","B. 100 C (212 F)","C. 140 C (285 F)","D. 200 C (392 F)"],answer:"C",explanation:"The Maillard reaction proceeds significantly above ~140C (285F). Boiling at 100C does not produce browning."},
+    {type:"mc",q:"Caramelization differs from the Maillard reaction because caramelization involves:",choices:["A. Only the breakdown of proteins","B. Only the breakdown and reaction of sugars","C. Both proteins and sugars","D. Only lipid oxidation"],answer:"B",explanation:"Caramelization is purely thermal decomposition of sugar -- no protein is involved."},
+    {type:"mc",q:"Baking soda (sodium bicarbonate) has a pH of about 9. This makes it:",choices:["A. Strongly acidic","B. Weakly acidic","C. Neutral","D. Basic/alkaline"],answer:"D",explanation:"A pH of 9 is above 7, so baking soda is basic (alkaline)."},
+    {type:"mc",q:"Which of the following would turn red cabbage pH indicator to blue-green, indicating basic pH?",choices:["A. Lemon juice","B. Vinegar","C. Baking soda solution","D. Orange juice"],answer:"C",explanation:"Baking soda solution is basic (~pH 9), which turns red cabbage indicator blue-green. Acidic solutions turn it red or pink."},
+    {type:"sa",q:"A student leaves toast under the broiler. Explain using food chemistry vocabulary why it turns brown and develops complex flavor.",answer:"When bread is heated above ~140C, the Maillard reaction occurs between reducing sugars (from starch breakdown) and amino acids in the bread proteins. This produces hundreds of new flavor and aroma compounds along with brown-colored melanoidin pigments. At higher temperatures (~160C), caramelization of sugars also contributes additional browning. These reactions together create the characteristic color, aroma, and flavor of toasted bread.",explanation:""},
+    {type:"mc",q:"Why does bread brown in a toaster but NOT in boiling water?",choices:["A. Boiling water contains too much oxygen","B. Boiling temperature (100C) is too low for the Maillard reaction","C. Water dissolves the sugar needed for browning","D. Humidity prevents caramelization"],answer:"B",explanation:"The Maillard reaction requires temperatures above ~140C, which cannot be reached in boiling water (maximum 100C at sea level)."},
+    {type:"mc",q:"Vinegar is used to preserve pickles primarily because:",choices:["A. It raises the pH, inhibiting bacterial growth","B. It lowers the pH, creating an acidic environment hostile to most bacteria","C. It provides essential nutrients to prevent spoilage","D. It removes oxygen from the jar"],answer:"B",explanation:"Vinegar's acetic acid lowers pH to around 2-3, which is too acidic for most spoilage bacteria and pathogens to survive."},
+    {type:"mc",q:"Which of the following is an example of caramelization and NOT the Maillard reaction?",choices:["A. Browning of bread crust","B. Browning of grilled steak","C. Browning of pure sugar syrup heated in a pan","D. Browning of cookies"],answer:"C",explanation:"Pure sugar syrup contains no protein (amino acids), so only caramelization can occur. The other options involve protein-containing foods where the Maillard reaction also occurs."},
+    {type:"mc",q:"Coffee (pH 5) and milk (pH 6.5) -- when you add milk to coffee:",choices:["A. The mixture becomes more acidic","B. The mixture becomes more basic","C. The mixture stays at the same pH","D. The mixture reaches exactly pH 7"],answer:"B",explanation:"Adding milk (pH 6.5, more basic than coffee) raises the pH of the mixture slightly, making it less acidic."},
+    {type:"sa",q:"What is the difference between the Maillard reaction and caramelization? Give the temperature and reactants for each.",answer:"Maillard reaction: occurs at ~140C (285F), involves a reducing sugar reacting with an amino acid from protein. Produces brown color and complex savory/roasted flavors. Caramelization: occurs at ~160C (320F) and above, involves only sugar with no protein needed. Produces brown color and sweet, butterscotch-like flavors. Key difference: Maillard requires both protein and sugar; caramelization requires only sugar.",explanation:""},
+    {type:"mc",q:"Polyphenol oxidase causes apple slices to turn brown when cut. This is called:",choices:["A. Caramelization","B. Enzymatic browning","C. The Maillard reaction","D. Fermentation"],answer:"B",explanation:"Enzymatic browning occurs when polyphenol oxidase reacts with oxygen and phenolic compounds. This is different from caramelization and the Maillard reaction."},
+    {type:"mc",q:"Adding lemon juice to cut apples prevents browning because:",choices:["A. It raises the pH, which deactivates the browning enzyme","B. It lowers the pH, which deactivates the browning enzyme","C. It introduces new amino acids","D. It caramelizes the surface immediately"],answer:"B",explanation:"Polyphenol oxidase works best at neutral to slightly basic pH. Citric acid in lemon juice lowers the pH, inhibiting enzyme activity."},
+  ],
+  5:[
+    {type:"mc",q:"Which microorganism is used to make yogurt through fermentation?",choices:["A. Saccharomyces cerevisiae","B. Lactobacillus bacteria","C. Aspergillus mold","D. E. coli bacteria"],answer:"B",explanation:"Lactobacillus bacteria ferment lactose in milk to produce lactic acid, which thickens the milk and gives yogurt its tangy flavor."},
+    {type:"mc",q:"The yeast fermentation equation can be summarized as:",choices:["A. Glucose -> water + carbon dioxide","B. Glucose -> ethanol + carbon dioxide","C. Glucose + oxygen -> water + carbon dioxide","D. Glucose -> lactic acid + water"],answer:"B",explanation:"During anaerobic yeast fermentation: glucose produces ethanol + CO2. The CO2 causes bread to rise."},
+    {type:"mc",q:"Which foodborne pathogen is most commonly associated with raw or undercooked poultry?",choices:["A. Listeria monocytogenes","B. Norovirus","C. Salmonella","D. Clostridium botulinum"],answer:"C",explanation:"Salmonella is strongly associated with raw poultry and eggs. It causes gastroenteritis with symptoms appearing 6-72 hours after exposure."},
+    {type:"mc",q:"Molds in blue cheese (like Penicillium roqueforti) are considered:",choices:["A. Harmful pathogens","B. Beneficial microorganisms used intentionally","C. Contamination that should be removed","D. Spoilage organisms that make cheese unsafe"],answer:"B",explanation:"Penicillium roqueforti is deliberately introduced into blue cheese to create its characteristic flavor, aroma, and blue-green veining."},
+    {type:"mc",q:"Anaerobic fermentation means fermentation that occurs:",choices:["A. With oxygen present","B. Without oxygen present","C. At very high temperatures","D. Only in liquid environments"],answer:"B",explanation:"Anaerobic means without oxygen. Yeast switches to fermentation when oxygen is absent, producing ethanol and CO2."},
+    {type:"mc",q:"Listeria monocytogenes is particularly dangerous because it can grow:",choices:["A. Only at temperatures above 60C","B. In refrigerator temperatures (as low as 0C)","C. Only in acidic environments","D. Only in high-sugar foods"],answer:"B",explanation:"Unlike most pathogens, Listeria can grow at refrigerator temperatures (0-4C), making it especially dangerous in refrigerated ready-to-eat foods."},
+    {type:"mc",q:"The white fuzzy growth on stale bread is most likely:",choices:["A. A yeast colony","B. Bacterial biofilm","C. Mold (fungal growth)","D. A vitamin deposit"],answer:"C",explanation:"The white or gray-green fuzzy growth on bread is mold -- typically Rhizopus or Penicillium species. Molds are fungi, not bacteria."},
+    {type:"sa",q:"Explain why a balloon inflates when yeast is mixed with sugar and warm water in a sealed bottle.",answer:"When yeast is mixed with sugar and warm water in an anaerobic (low-oxygen) environment, it undergoes fermentation: glucose is broken down into ethanol and carbon dioxide gas (CO2). The CO2 gas has nowhere to escape except into the balloon, causing it to inflate. This is the same process that causes bread dough to rise during proofing.",explanation:""},
+    {type:"mc",q:"Which of the following is a beneficial use of microorganisms in food production?",choices:["A. Salmonella in chicken","B. Aspergillus oryzae in soy sauce","C. Listeria in deli meats","D. Norovirus in shellfish"],answer:"B",explanation:"Aspergillus oryzae (koji mold) is deliberately used in soy sauce, miso, and sake production to break down proteins and starches."},
+    {type:"mc",q:"Norovirus differs from bacterial foodborne pathogens because it:",choices:["A. Can be killed by refrigeration","B. Is a virus that requires a host cell to replicate","C. Requires high temperatures to cause illness","D. Only affects animals, not humans"],answer:"B",explanation:"Norovirus is a virus and cannot reproduce outside a living host cell. It does not multiply in food -- food is merely a vehicle."},
+    {type:"mc",q:"Why does bread dough double in size when left in a warm place?",choices:["A. The flour absorbs water and expands","B. Yeast ferments sugars and releases CO2 which forms bubbles in the gluten network","C. The gluten proteins stretch when heated","D. Baking powder reacts immediately with moisture"],answer:"B",explanation:"Yeast produces CO2 during fermentation. The gas gets trapped in the elastic gluten network of the dough, causing it to expand and rise."},
+    {type:"mc",q:"Which microorganism produces spores that survive boiling and can cause illness in improperly canned foods?",choices:["A. Salmonella","B. Norovirus","C. Clostridium botulinum","D. Lactobacillus"],answer:"C",explanation:"Clostridium botulinum produces heat-resistant spores. In sealed low-acid canned foods the spores can germinate and produce botulinum toxin."},
+    {type:"sa",q:"Name one food produced by bacterial fermentation and one by yeast fermentation. For each, name the microorganism involved.",answer:"Bacterial fermentation: Yogurt -- produced by Lactobacillus bulgaricus and Streptococcus thermophilus, which ferment lactose to lactic acid. Yeast fermentation: Bread -- produced using Saccharomyces cerevisiae (baker's yeast), which ferments sugars to produce CO2 that causes the dough to rise.",explanation:""},
+    {type:"mc",q:"The danger zone for bacterial growth in food is:",choices:["A. 0C - 4C (32F - 40F)","B. 4C - 60C (40F - 140F)","C. 60C - 100C (140F - 212F)","D. Below freezing only"],answer:"B",explanation:"The USDA defines the temperature danger zone as 40F-140F (4C-60C) -- the range where bacteria multiply most rapidly."},
+    {type:"mc",q:"Which practice BEST prevents cross-contamination in a kitchen?",choices:["A. Washing vegetables before cutting meat on the same board","B. Using separate cutting boards for raw meat and produce","C. Refrigerating all foods together","D. Using the same utensils for raw and cooked foods"],answer:"B",explanation:"Using separate cutting boards prevents pathogens from raw meat from transferring to ready-to-eat foods."},
+  ],
+};
+
+const API_SYSTEM = "You are a Science Olympiad Div B Food Science test writer for middle school students (grades 6-8).\nWrite exactly 15 questions for the given topic following these rules:\n- Mix: 12 multiple-choice (4 options A/B/C/D, exactly one correct) and 3 short answer\n- Difficulty: calibrated to SciOly Div B invitational level -- challenging but fair for prepared middle schoolers\n- Questions should test understanding, not just recall -- include data interpretation, application, and why questions\n- Short answer questions should have clear model answers of 2-4 sentences\n- Base questions on real SciOly Food Science content\n\nReturn ONLY valid JSON (no markdown, no backticks, no extra text) in this exact structure:\n[\n  {\"type\":\"mc\",\"q\":\"question text\",\"choices\":[\"A. option\",\"B. option\",\"C. option\",\"D. option\"],\"answer\":\"B\",\"explanation\":\"why B is correct\"},\n  {\"type\":\"sa\",\"q\":\"question text\",\"answer\":\"model answer 2-4 sentences\",\"explanation\":\"\"}\n]";
+
+let currentWeek=1, doneWeeks=new Set(), testedWeeks=new Set();
+let currentQuestions=[], userAnswers={}, revealed={}, submitted=false;
+
+function init(){
+  try{
+    const d=localStorage.getItem('scioly_fs_done'); if(d) doneWeeks=new Set(JSON.parse(d));
+    const t=localStorage.getItem('scioly_fs_tested'); if(t) testedWeeks=new Set(JSON.parse(t));
+    const w=localStorage.getItem('scioly_fs_week'); if(w) currentWeek=parseInt(w);
+  }catch(e){}
+  renderDots(); renderPlan(); showGreeting();
+}
+
+function save(){
+  try{
+    localStorage.setItem('scioly_fs_done',JSON.stringify([...doneWeeks]));
+    localStorage.setItem('scioly_fs_tested',JSON.stringify([...testedWeeks]));
+    localStorage.setItem('scioly_fs_week',currentWeek);
+  }catch(e){}
+}
+
+function renderDots(){
+  document.getElementById('week-dots').innerHTML=PLAN.map(w=>`
+    <div class="week-dot ${doneWeeks.has(w.week)?'done':''} ${testedWeeks.has(w.week)?'tested':''} ${w.week===currentWeek?'active':''}"
+      onclick="jumpWeek(${w.week})">${w.week}</div>`).join('');
+}
+
+function renderPlan(){
+  document.getElementById('plan-grid').innerHTML=PLAN.map(w=>`
+    <div class="plan-item ${doneWeeks.has(w.week)?'done':''}" onclick="startWeek(${w.week})">
+      <div class="plan-num">W${w.week}</div>
+      <div class="plan-info">
+        <div class="plan-name">${w.name}</div>
+        <div class="plan-sub">${w.sub}</div>
+        <div class="plan-badges">
+          ${doneWeeks.has(w.week)?'<span class="plan-pip pip-done">studied</span>':''}
+          ${testedWeeks.has(w.week)?'<span class="plan-pip pip-tested">tested</span>':''}
+        </div>
+      </div>
+    </div>`).join('');
+  document.getElementById('start-week-label').textContent=currentWeek;
+  document.getElementById('test-week-label').textContent=currentWeek;
+}
+
+function jumpWeek(w){ currentWeek=w; save(); renderDots(); document.getElementById('start-week-label').textContent=w; document.getElementById('test-week-label').textContent=w; }
+
+function showGreeting(){
+  document.getElementById('view-greeting').style.display='block';
+  document.getElementById('view-study').style.display='none';
+  document.getElementById('view-test').style.display='none';
+  document.getElementById('panel-label').textContent='Study planner';
+  document.getElementById('panel-week').textContent='';
+  document.getElementById('panel-dot').className='panel-dot';
+}
+
+function startWeek(w){
+  currentWeek=w; save();
+  const p=PLAN.find(x=>x.week===w), d=RES[w];
+  document.getElementById('view-greeting').style.display='none';
+  document.getElementById('view-study').style.display='block';
+  document.getElementById('view-test').style.display='none';
+  document.getElementById('panel-label').textContent='Researcher';
+  document.getElementById('panel-week').textContent='Week '+w+' of 14';
+  document.getElementById('panel-dot').className='panel-dot';
+  document.getElementById('study-eyebrow').textContent='Week '+w+' -- Food Science';
+  document.getElementById('study-title').textContent=p.name;
+  document.getElementById('study-desc').textContent=p.desc;
+  document.getElementById('goal-box-container').innerHTML=
+    '<div class="goal-box"><div class="goal-header"><span style="font-size:13px">&#127919;</span><span class="goal-label">Weekly goal</span></div><div class="goal-text">'+p.goal+'</div><ul class="goal-items" style="margin-top:8px">'+p.goalItems.map(i=>'<li>'+i+'</li>').join('')+'</ul></div>';
+  document.querySelectorAll('.time-seg-fill').forEach(el=>el.style.width='0%');
+  const videos=d.resources.filter(r=>r.type==='video');
+  const reads=d.resources.filter(r=>r.type==='read');
+  const acts=d.resources.filter(r=>r.type==='activity');
+  let html='<div class="concepts-box"><div class="concepts-title">Key concepts this week</div><div class="concepts-list">'+p.concepts.map(c=>'<span class="concept-tag">'+c+'</span>').join('')+'</div></div>';
+  if(videos.length)html+='<div class="res-section-label">Watch first</div>'+videos.map((r,i)=>resCard(r,i*80)).join('');
+  if(reads.length) html+='<div class="res-section-label">Then read</div>'+reads.map((r,i)=>resCard(r,(videos.length+i)*80)).join('');
+  if(acts.length)  html+='<div class="res-section-label">Hands-on activity</div>'+acts.map((r,i)=>resCard(r,(videos.length+reads.length+i)*80)).join('');
+  document.getElementById('resource-content').innerHTML=html;
+  setTimeout(()=>[65,80,90,100].forEach((v,i)=>setTimeout(()=>{document.querySelectorAll('.time-seg-fill')[i].style.width=v+'%';},i*180)),300);
+}
+
+function resCard(r,delay){
+  const badges={video:'badge-video',read:'badge-read',activity:'badge-activity'};
+  const labels={video:'VIDEO',read:'READING',activity:'ACTIVITY'};
+  const isYT=r.url&&r.url.includes('youtube.com');
+  const isGS=r.url&&r.url.includes('google.com/search');
+  const linkText=isYT?'Watch on YouTube &#8599;':isGS?'Search for this &#8599;':'Open resource &#8599;';
+  const link=r.url?'<a class="res-link" href="'+r.url+'" target="_blank" rel="noopener">'+linkText+'</a>':'';
+  return '<div class="resource-card" style="animation-delay:'+delay+'ms"><div class="res-type-badge '+badges[r.type]+'">'+labels[r.type]+'</div><div class="res-body"><div class="res-title">'+r.title+'</div><div class="res-source">'+r.source+'</div><div class="res-desc">'+r.desc+'</div><div class="res-time">&#9201; '+r.time+'</div>'+link+'</div></div>';
+}
+
+function markDone(){ doneWeeks.add(currentWeek); if(currentWeek<14) currentWeek++; save(); renderDots(); renderPlan(); showGreeting(); }
+
+async function startTest(w){
+  currentWeek=w; save();
+  const p=PLAN.find(x=>x.week===w);
+  document.getElementById('view-greeting').style.display='none';
+  document.getElementById('view-study').style.display='none';
+  document.getElementById('view-test').style.display='block';
+  document.getElementById('panel-label').textContent='Tester';
+  document.getElementById('panel-week').textContent='Week '+w+' of 14';
+  document.getElementById('panel-dot').className='panel-dot blue';
+  document.getElementById('test-eyebrow').textContent='Week '+w+' -- Practice Test';
+  document.getElementById('test-title').textContent=p.name;
+  document.getElementById('test-subtitle').textContent='SciOly Div B level - Auto-graded MC - Model answers for short answer';
+  document.getElementById('test-generating').style.display='block';
+  document.getElementById('test-body').style.display='none';
+  document.getElementById('test-error').style.display='none';
+  document.getElementById('score-summary').className='score-summary';
+  document.getElementById('score-bar-wrap').style.display='none';
+  document.getElementById('submit-btn').style.display='none';
+  document.getElementById('retry-btn').style.display='none';
+  userAnswers={}; revealed={}; submitted=false; currentQuestions=[];
+  if(TESTS[w]){
+    currentQuestions=TESTS[w];
+    document.getElementById('gen-label').textContent='Loading your practice test...';
+    await new Promise(r=>setTimeout(r,600));
+    renderTest(currentQuestions);
+  } else {
+    document.getElementById('gen-label').textContent='Generating test for "'+p.name+'"...';
+    document.getElementById('gen-sub').textContent='Claude is writing 15 SciOly-calibrated questions';
+    try{
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:API_SYSTEM,messages:[{role:'user',content:'Write 15 Science Olympiad Div B Food Science questions for:\nTopic: '+p.name+'\nDescription: '+p.desc+'\nKey concepts: '+p.concepts.join(', ')}]})});
+      const data=await resp.json();
+      const raw=data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+      currentQuestions=JSON.parse(raw.replace(/```json|```/g,'').trim());
+      renderTest(currentQuestions);
+    }catch(e){
+      document.getElementById('test-generating').style.display='none';
+      document.getElementById('test-error').style.display='block';
+      document.getElementById('test-error').textContent='Could not generate test. The AI API is unavailable or your connection is offline. Try again, or use the Study button to review material instead.';
+    }
+  }
+}
+
+function renderTest(qs){
+  document.getElementById('test-generating').style.display='none';
+  document.getElementById('test-body').style.display='block';
+  document.getElementById('score-bar-wrap').style.display='block';
+  document.getElementById('submit-btn').style.display='inline-block';
+  updateScoreBar();
+  document.getElementById('test-body').innerHTML=qs.map((q,i)=>qBlock(q,i)).join('');
+}
+
+function qBlock(q,i){
+  const typeLabel=q.type==='mc'?'MULTIPLE CHOICE':'SHORT ANSWER';
+  if(q.type==='mc'){
+    const letters=['A','B','C','D'];
+    const choicesHtml=q.choices.map((c,ci)=>'<li class="q-choice" id="choice-'+i+'-'+ci+'" onclick="selectChoice('+i+','+ci+',\''+letters[ci]+'\')">'+'<span class="q-letter">'+letters[ci]+'.</span><span>'+c.replace(/^[A-D]\.\s*/,'')+'</span></li>').join('');
+    return '<div class="q-block" style="animation-delay:'+i*60+'ms" id="qblock-'+i+'"><div class="q-num">Q'+(i+1)+' <span class="q-type-tag">'+typeLabel+'</span></div><div class="q-text">'+q.q+'</div><ul class="q-choices">'+choicesHtml+'</ul><div class="q-explanation" id="exp-'+i+'">'+q.explanation+'</div></div>';
+  } else {
+    return '<div class="q-block" style="animation-delay:'+i*60+'ms" id="qblock-'+i+'"><div class="q-num">Q'+(i+1)+' <span class="q-type-tag">'+typeLabel+'</span></div><div class="q-text">'+q.q+'</div><textarea class="q-input" id="input-'+i+'" placeholder="Write your answer here..." oninput="updateScoreBar()"></textarea><button class="reveal-btn" id="reveal-btn-'+i+'" onclick="revealAnswer('+i+')">Show model answer</button><div class="answer-reveal" id="reveal-'+i+'"><span class="answer-label">Model answer</span>'+q.answer+'</div></div>';
+  }
+}
+
+function selectChoice(qi,ci,letter){
+  if(submitted) return;
+  userAnswers[qi]=letter;
+  document.querySelectorAll('[id^="choice-'+qi+'-"]').forEach(el=>el.className='q-choice');
+  document.getElementById('choice-'+qi+'-'+ci).className='q-choice selected';
+  updateScoreBar();
+}
+
+function revealAnswer(i){
+  revealed[i]=true;
+  document.getElementById('reveal-'+i).className='answer-reveal show';
+  document.getElementById('reveal-btn-'+i).style.display='none';
+  document.getElementById('input-'+i).className='q-input revealed';
+}
+
+function updateScoreBar(){
+  const mc=currentQuestions.filter(q=>q.type==='mc');
+  const answered=Object.keys(userAnswers).length;
+  document.getElementById('score-bar-text').textContent=answered+' / '+mc.length+' answered';
+  document.getElementById('score-bar-fill').style.width=(mc.length?answered/mc.length*100:0)+'%';
+}
+
+function submitTest(){
+  if(submitted) return;
+  submitted=true;
+  document.getElementById('submit-btn').style.display='none';
+  document.getElementById('retry-btn').style.display='inline-block';
+  let correct=0, total=0;
+  const letters=['A','B','C','D'];
+  currentQuestions.forEach((q,i)=>{
+    if(q.type==='mc'){
+      total++;
+      const correctIdx=letters.indexOf(q.answer);
+      letters.forEach((l,ci)=>{
+        const el=document.getElementById('choice-'+i+'-'+ci);
+        if(!el) return;
+        if(ci===correctIdx){ el.className='q-choice correct'; }
+        else if(userAnswers[i]===l){ el.className='q-choice wrong'; }
+        else{ el.className='q-choice'; }
+      });
+      if(userAnswers[i]===q.answer) correct++;
+      const expEl=document.getElementById('exp-'+i);
+      if(expEl) expEl.className='q-explanation show';
+    } else { revealAnswer(i); }
+  });
+  const pct=total?Math.round(correct/total*100):0;
+  const emoji=pct>=90?'&#127942;':pct>=75?'&#127919;':pct>=60?'&#128200;':'&#128218;';
+  const msg=pct>=90?'Outstanding! Competition-ready.':pct>=75?'Great work -- review the questions you missed.':pct>=60?'Good effort -- re-read the study material for missed topics.':'Keep going -- review this week\'s material and retry.';
+  const sa=currentQuestions.filter(q=>q.type==='sa').length;
+  const summary=document.getElementById('score-summary');
+  summary.innerHTML='<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;"><div class="score-big">'+emoji+' '+correct+'/'+total+'</div><div><div style="font-size:14px;color:var(--text);font-weight:500">'+pct+'% on multiple choice</div><div class="score-detail">'+msg+'</div>'+(sa?'<div class="score-detail" style="margin-top:4px">'+sa+' short answer question'+(sa>1?'s':'')+' -- check your answers against the model answers above.</div>':'')+'</div></div>';
+  summary.className='score-summary show';
+  testedWeeks.add(currentWeek); save(); renderDots(); renderPlan();
+  document.getElementById('score-bar-fill').style.background=pct>=75?'var(--accent)':'var(--amber)';
+  document.getElementById('score-bar-text').textContent=correct+' / '+total+' correct';
+  window.scrollTo({top:document.getElementById('score-summary').offsetTop-20,behavior:'smooth'});
+}
+
+init();
+</script>
+</body>
+</html>
